@@ -1,3 +1,7 @@
+bin/game
+code/obj/*.o
+code/libs/obj/*.o
+
 # Prerequisites
 *.d
 
