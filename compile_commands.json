@@ -1,0 +1,15 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-Icode/include",
+      "-o",
+      "code/obj/main.o",
+      "code/src/main.c"
+    ],
+    "directory": "/home/lhgs/dev/C/survivors_like",
+    "file": "/home/lhgs/dev/C/survivors_like/code/src/main.c",
+    "output": "/home/lhgs/dev/C/survivors_like/code/obj/main.o"
+  }
+]
