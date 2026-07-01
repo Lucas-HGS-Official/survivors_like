@@ -1,4 +1,4 @@
-GAME_NAME = ray_pong_clone
+GAME_NAME = survivors_like
 
 TARGET = bin/$(GAME_NAME)
 WEB_TARGET = bin/$(GAME_NAME).html
