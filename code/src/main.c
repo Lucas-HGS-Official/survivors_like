@@ -1,4 +1,3 @@
-#include "settings.h"
 #include "game.h"
 
 int main(void) {
