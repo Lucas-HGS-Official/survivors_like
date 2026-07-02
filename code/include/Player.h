@@ -2,14 +2,9 @@
 
 #include <raylib.h>
 
-#include "Sprite.h"
+typedef struct Player Player;
 
-typedef struct Player {
-    Sprite spr;
-    Vector2 direction;
-    float speed;
-} Player;
-
-void init_player(Player *player);
+Player *init_player(void);
 void update_player(Player *player,float dt);
+void draw_player(Player *player);
 void destroy_player(Player *player);

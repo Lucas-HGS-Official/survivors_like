@@ -1,4 +1,4 @@
-bin/game
+bin/survivors_like
 code/obj/*.o
 code/libs/obj/*.o
 
