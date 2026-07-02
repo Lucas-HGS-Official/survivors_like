@@ -65,14 +65,12 @@ Player *init_player(void) {
         }
     }
 
-    // init_sprite(&(player->spr), "resources/images/player/down/0.png");
     player->facing_dir = UP_FACE_PLAYER;
     player->anim_state = STOPPED_PLAYER;
     player->current_frame = 0;
     player->tint = WHITE;
 
     player->direction = (Vector2) {};
-    // player->direction = Vector2Normalize(player->direction);
     player->speed = 400.f;
     player->position = (Vector2) {
         .x = WINDOW_WIDTH/2.f,
@@ -101,10 +99,6 @@ void update_player(Player *player,float dt) {
         player->facing_dir = UP_FACE_PLAYER;
     }
     if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) { player->direction.y = 0; }
-    // player->direction = (Vector2){
-    //     .x = (int)IsKeyDown(KEY_RIGHT) - (int)IsKeyDown(KEY_LEFT),
-    //     .y = (int)IsKeyDown(KEY_DOWN) - (int)IsKeyDown(KEY_UP)
-    // };
     player->direction = Vector2Normalize(player->direction);
 
     Sprite *current_sprite = &player->spr[player->facing_dir][player->current_frame];
@@ -113,23 +107,12 @@ void update_player(Player *player,float dt) {
         .x = player->position.x + (player->direction.x * player->speed * dt),
         .y = player->position.y + (player->direction.y * player->speed * dt),
     };
-    // Vector2 position = {
-    //     .x = player->spr.dest_rec.x + (player->direction.x * player->speed * dt),
-    //     .y = player->spr.dest_rec.y + (player->direction.y * player->speed * dt),
-    // };
     Vector2 half_size = {
         .x = current_sprite->dest_rec.width/2.f,
         .y = current_sprite->dest_rec.height/2.f,
     };
-    // Vector2 half_size = {
-    //     .x = player->spr.dest_rec.width/2.f,
-    //     .y = player->spr.dest_rec.height/2.f,
-    // };
     player->position.x = Clamp(player->position.x, half_size.x, WINDOW_WIDTH - half_size.x);
     player->position.y = Clamp(player->position.y, half_size.y, WINDOW_HEIGHT - half_size.y);
-    // player->spr.dest_rec.x = Clamp(position.x, half_size.x, WINDOW_WIDTH - half_size.x);
-    // player->spr.dest_rec.y = Clamp(position.y, half_size.y, WINDOW_HEIGHT - half_size.y);
-
 
     return;
 }
@@ -147,7 +130,6 @@ void destroy_player(Player* player) {
             destroy_sprite(&player->spr[i][j]);
         }
     }
-    // destroy_sprite(&(player->spr));
     MemFree(player->spr);
     MemFree(player);
 
