@@ -55,7 +55,6 @@ void _draw_game(void) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    // draw_sprite(player.spr, player.spr.tint);
     draw_player(player);
 
     EndDrawing();

@@ -1,12 +1,14 @@
 #include "Sprite.h"
 
-#include "settings.h"
 #include <raylib.h>
+
+#include "settings.h"
 
 
 void init_sprite(Sprite *sprite, char *texture_file_path) {
+    // Initiating all necessary values to draw the a Texture2D
     sprite->texture = MemAlloc(sizeof(Texture2D));
-    *(sprite->texture) = LoadTexture(texture_file_path);
+    *sprite->texture = LoadTexture(texture_file_path);
     sprite->src_rec = (Rectangle) {
         .width = sprite->texture->width, .height = sprite->texture->height,
         .x = 0, .y = 0,
@@ -22,12 +24,12 @@ void init_sprite(Sprite *sprite, char *texture_file_path) {
     return;
 }
 void draw_sprite(Sprite *sprite, Color sprite_tint) {
-    DrawTexturePro(*(sprite->texture), sprite->src_rec, sprite->dest_rec, sprite->origin, sprite->rotation, sprite_tint);
+    DrawTexturePro(*sprite->texture, sprite->src_rec, sprite->dest_rec, sprite->origin, sprite->rotation, sprite_tint);
 
     return;
 }
 void destroy_sprite(Sprite *sprite) {
-    UnloadTexture(*(sprite->texture));
+    UnloadTexture(*sprite->texture);
     MemFree(sprite->texture);
 
     return;

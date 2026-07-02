@@ -6,7 +6,7 @@
 #include "settings.h"
 #include "Sprite.h"
 
-
+// All player animations have for 4 frames
 #define NUM_FRAMES 4
 
 typedef enum PlayerAnimState {
@@ -41,6 +41,7 @@ typedef struct Player {
 Player *init_player(void) {
     Player *player = (Player*) MemAlloc(sizeof(Player));
 
+    // Loading all images for each player frame
     player->spr = (Sprite**) MemAlloc(sizeof(Sprite*)*NUM_FACE_PLAYER);
     for (int i=0; i<NUM_FACE_PLAYER; i++) {
         char *facing_dir = "";
@@ -65,6 +66,7 @@ Player *init_player(void) {
         }
     }
 
+    // Initiating all other player values
     player->facing_dir = UP_FACE_PLAYER;
     player->anim_state = STOPPED_PLAYER;
     player->current_frame = 0;
@@ -80,6 +82,7 @@ Player *init_player(void) {
     return player;
 }
 void update_player(Player *player,float dt) {
+    // Player controls
     if (IsKeyDown(KEY_RIGHT)) {
         player->direction.x = 1;
         player->facing_dir = RIGHT_FACE_PLAYER;
@@ -99,6 +102,11 @@ void update_player(Player *player,float dt) {
         player->facing_dir = UP_FACE_PLAYER;
     }
     if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) { player->direction.y = 0; }
+
+    // TODO: chance animation state
+    // TODO: animation state machine
+
+    // Player movement
     player->direction = Vector2Normalize(player->direction);
 
     Sprite *current_sprite = &player->spr[player->facing_dir][player->current_frame];
@@ -125,6 +133,7 @@ void draw_player(Player *player) {
     return;
 }
 void destroy_player(Player* player) {
+    // Unloading each texture
     for (int i=0; i<NUM_FACE_PLAYER; i++) {
         for (int j=0; j<NUM_FRAMES; j++) {
             destroy_sprite(&player->spr[i][j]);
