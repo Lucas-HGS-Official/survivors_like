@@ -39,9 +39,14 @@ typedef struct Player {
 
     PlayerFacingDir facing_direction;
     PlayerAnimState anim_state;
+    float frame_timer;
+    float current_frame_time;
     int current_frame;
     Color tint;
 } Player;
+
+void _start_animation(Player *player);
+void _stop_animation(Player *player);
 
 Rectangle collision_test_rec_1 = {0};
 Rectangle collision_test_rec_2 = {0};
@@ -81,6 +86,8 @@ Player *init_player(void) {
     player->facing_direction = DOWN_FACE_PLAYER;
     player->anim_state = WALKING_PLAYER;
     player->current_frame = 0;
+    player->current_frame_time = 0.1f;
+    player->frame_timer = 0;
     player->tint = WHITE;
 
     player->direction = (Vector2) {};
@@ -119,28 +126,53 @@ void update_player(Player *player,float dt) {
         player->direction.x = 1;
         player->facing_direction = RIGHT_FACE_PLAYER;
         player_collision_rec(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
+        _start_animation(player);
     }
     if (IsKeyDown(KEY_LEFT)) {
         player->direction.x = -1;
         player->facing_direction = LEFT_FACE_PLAYER;
         player_collision_rec(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
+        _start_animation(player);
     }
-    if (!IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) { player->direction.x = 0; }
-
     if (IsKeyDown(KEY_DOWN)) {
         player->direction.y = 1;
         player->facing_direction = DOWN_FACE_PLAYER;
         player_collision_rec(player, VERTICAL_COLLISION_MODE, collision_list, 3);
+        _start_animation(player);
     }
     if (IsKeyDown(KEY_UP)) {
         player->direction.y = -1;
         player->facing_direction = UP_FACE_PLAYER;
         player_collision_rec(player, VERTICAL_COLLISION_MODE, collision_list, 3);
+        _start_animation(player);
     }
-    if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) { player->direction.y = 0; }
+    if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) {
+        player->direction.y = 0;
+        player->direction.x = 0;
+        _stop_animation(player);
+    }
 
-    // TODO: chance animation state
-    // TODO: animation state machine
+    // Animation state machine
+    switch (player->anim_state) {
+        case STOPPED_PLAYER:
+            player->current_frame = 0;
+            player->frame_timer = 0;
+            break;
+        case WALKING_PLAYER:
+            // if (player->current_frame == 0) {
+            //     player->current_frame += 1;
+            // } else
+            if (player->frame_timer <= GetTime() - player->current_frame_time) {
+                player->current_frame += 1;
+                if (player->current_frame >= NUM_FRAMES) {
+                    player->current_frame = 0;
+                }
+                player->frame_timer = GetTime();
+            }
+            break;
+        case NUM_ANIM_STATES:
+            break;
+    }
 
     // Player movement
     player->direction = Vector2Normalize(player->direction);
@@ -200,4 +232,17 @@ void player_collision_rec(Player *player, char collision_mode, Rectangle* collis
             printf("\n Overlap in %c mode\n", collision_mode);
         }
     }
+}
+
+void _start_animation(Player *player) {
+    player->anim_state = WALKING_PLAYER;
+    if (player->frame_timer == 0) { player->frame_timer = GetTime(); }
+
+    return;
+}
+void _stop_animation(Player *player) {
+    player->anim_state = STOPPED_PLAYER;
+    player->frame_timer = 0;
+
+    return;
 }
