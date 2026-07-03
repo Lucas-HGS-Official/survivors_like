@@ -2,7 +2,6 @@
 
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 #include "settings.h"
 #include "Sprite.h"
@@ -35,7 +34,7 @@ typedef struct Player {
     Vector2 position;
     Vector2 direction;
     float speed;
-    Rectangle collision_rec;
+    Rectangle hitbox_rec;
 
     PlayerFacingDir facing_direction;
     PlayerAnimState anim_state;
@@ -47,6 +46,9 @@ typedef struct Player {
 
 void _start_animation(Player *player);
 void _stop_animation(Player *player);
+
+void _controls(Player *player);
+void _movement(Player *player, float dt);
 
 Rectangle collision_test_rec_1 = {0};
 Rectangle collision_test_rec_2 = {0};
@@ -97,6 +99,12 @@ Player *init_player(void) {
         .y = WINDOW_HEIGHT/2.f,
     };
 
+    Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
+    Rectangle player_hitbox_rec = current_sprite->dest_rec;
+    player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
+    player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
+    player->hitbox_rec = player_hitbox_rec;
+
     // Initiating test collision rectangles (Delete latter)
     collision_test_rec_1 = (Rectangle) {
         .height = 200,
@@ -121,36 +129,7 @@ Player *init_player(void) {
     return player;
 }
 void update_player(Player *player,float dt) {
-    // Player controls
-    if (IsKeyDown(KEY_RIGHT)) {
-        player->direction.x = 1;
-        player->facing_direction = RIGHT_FACE_PLAYER;
-        player_collision_rec(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
-        _start_animation(player);
-    }
-    if (IsKeyDown(KEY_LEFT)) {
-        player->direction.x = -1;
-        player->facing_direction = LEFT_FACE_PLAYER;
-        player_collision_rec(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
-        _start_animation(player);
-    }
-    if (IsKeyDown(KEY_DOWN)) {
-        player->direction.y = 1;
-        player->facing_direction = DOWN_FACE_PLAYER;
-        player_collision_rec(player, VERTICAL_COLLISION_MODE, collision_list, 3);
-        _start_animation(player);
-    }
-    if (IsKeyDown(KEY_UP)) {
-        player->direction.y = -1;
-        player->facing_direction = UP_FACE_PLAYER;
-        player_collision_rec(player, VERTICAL_COLLISION_MODE, collision_list, 3);
-        _start_animation(player);
-    }
-    if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) {
-        player->direction.y = 0;
-        player->direction.x = 0;
-        _stop_animation(player);
-    }
+    _controls(player);
 
     // Animation state machine
     switch (player->anim_state) {
@@ -159,9 +138,6 @@ void update_player(Player *player,float dt) {
             player->frame_timer = 0;
             break;
         case WALKING_PLAYER:
-            // if (player->current_frame == 0) {
-            //     player->current_frame += 1;
-            // } else
             if (player->frame_timer <= GetTime() - player->current_frame_time) {
                 player->current_frame += 1;
                 if (player->current_frame >= NUM_FRAMES) {
@@ -174,42 +150,18 @@ void update_player(Player *player,float dt) {
             break;
     }
 
-    // Player movement
-    player->direction = Vector2Normalize(player->direction);
-
-    Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-
-    player->position = (Vector2) {
-        .x = player->position.x + (player->direction.x * player->speed * dt),
-        .y = player->position.y + (player->direction.y * player->speed * dt),
-    };
-    Vector2 half_size = {
-        .x = current_sprite->dest_rec.width/2.f,
-        .y = current_sprite->dest_rec.height/2.f,
-    };
-    player->position.x = Clamp(player->position.x, half_size.x, WINDOW_WIDTH - half_size.x);
-    player->position.y = Clamp(player->position.y, half_size.y, WINDOW_HEIGHT - half_size.y);
-
-    Rectangle player_collision_rec = current_sprite->dest_rec;
-    player_collision_rec.x -= player_collision_rec.width/2.f;
-    player_collision_rec.y -= player_collision_rec.height/2.f;
-
-    player->collision_rec = player_collision_rec;
+    _movement(player, dt);
 
     return;
 }
 void draw_player(Player *player) {
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-    current_sprite->dest_rec.x = player->position.x;
-    current_sprite->dest_rec.y = player->position.y;
     draw_sprite(current_sprite, player->tint);
 
     // Draw test collision recs (delete later)
     DrawRectangleRec(collision_test_rec_1, RED);
     DrawRectangleRec(collision_test_rec_2, GREEN);
     DrawRectangleRec(collision_test_rec_3, BLUE);
-
-    // DrawRectangleLinesEx(player->collision_rec, 5, YELLOW);
 
     return;
 }
@@ -226,10 +178,34 @@ void destroy_player(Player* player) {
     return;
 }
 
-void player_collision_rec(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs) {
+void player_collision(Player *player, char collision_mode, Rectangle* hitbox_rec_list, int num_recs) {
+    Rectangle player_hitbox_rec = player->hitbox_rec;
+    player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
+    player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
     for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(player->collision_rec, collision_rec_list[i])) {
-            printf("\n Overlap in %c mode\n", collision_mode);
+        if (CheckCollisionRecs(player_hitbox_rec, hitbox_rec_list[i])) {
+
+            float collided_right_side = hitbox_rec_list[i].x + hitbox_rec_list[i].width;
+            float collided_left_left = hitbox_rec_list[i].x;
+            float collided_top_side = hitbox_rec_list[i].y;
+            float collided_bottom_side = hitbox_rec_list[i].y + hitbox_rec_list[i].height;
+
+
+            if (collision_mode == 'h') {
+                if (player->direction.x > 0) {
+                    player->hitbox_rec.x = collided_left_left - player_hitbox_rec.width/2.f;
+                }
+                if (player->direction.x < 0) {
+                    player->hitbox_rec.x = collided_right_side + player_hitbox_rec.width/2.f;
+                }
+            } else {
+                if (player->direction.y > 0) {
+                    player->hitbox_rec.y = collided_top_side - player_hitbox_rec.height/2.f;
+                }
+                if (player->direction.y < 0) {
+                    player->hitbox_rec.y = collided_bottom_side + player_hitbox_rec.height/2.f;
+                }
+            }
         }
     }
 }
@@ -243,6 +219,58 @@ void _start_animation(Player *player) {
 void _stop_animation(Player *player) {
     player->anim_state = STOPPED_PLAYER;
     player->frame_timer = 0;
+
+    return;
+}
+
+void _controls(Player *player) {
+    player->direction = (Vector2){
+        .x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT),
+        .y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP)
+    };
+    player->direction = Vector2Normalize(player->direction);
+
+    if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) { player->direction.y = 0; }
+    if (!IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) { player->direction.x = 0; }
+
+    player->direction = Vector2Normalize(player->direction);
+
+    if (player->direction.x > 0) { player->facing_direction = RIGHT_FACE_PLAYER; }
+    if (player->direction.x < 0) { player->facing_direction = LEFT_FACE_PLAYER; }
+    if (player->direction.y > 0) { player->facing_direction = DOWN_FACE_PLAYER; }
+    if (player->direction.y < 0) { player->facing_direction = UP_FACE_PLAYER; }
+
+    if (player->direction.y == 0 && player->direction.x == 0) {
+        _stop_animation(player);
+    } else { _start_animation(player); }
+
+
+    return;
+}
+
+void _movement(Player *player, float dt) {
+    // Player movement
+    Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
+
+    player->hitbox_rec.x += player->direction.x * player->speed * dt;
+    player_collision(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
+    player->hitbox_rec.y += player->direction.y * player->speed * dt;
+    player_collision(player, VERTICAL_COLLISION_MODE, collision_list, 3);
+
+    Vector2 half_size = {
+        .x = player->hitbox_rec.width/2.f,
+        .y = player->hitbox_rec.height/2.f,
+    };
+    player->hitbox_rec.x = Clamp(player->hitbox_rec.x, half_size.x, WINDOW_WIDTH - half_size.x);
+    player->hitbox_rec.y = Clamp(player->hitbox_rec.y, half_size.y, WINDOW_HEIGHT - half_size.y);
+
+    player->position = (Vector2) {
+        .x = player->hitbox_rec.x,
+        .y = player->hitbox_rec.y,
+    };
+
+    current_sprite->dest_rec.x = player->position.x;
+    current_sprite->dest_rec.y = player->position.y;
 
     return;
 }

@@ -9,4 +9,4 @@ void update_player(Player *player,float dt);
 void draw_player(Player *player);
 void destroy_player(Player *player);
 
-void player_collision_rec(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs);
+void player_collision(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs);
