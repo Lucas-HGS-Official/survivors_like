@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
 
 #include "settings.h"
 #include "Sprite.h"
@@ -13,47 +14,49 @@
 #define VERTICAL_COLLISION_MODE 'v'
 
 
-typedef enum PlayerAnimState {
-    STOPPED_PLAYER,
-    WALKING_PLAYER,
+// typedef enum PlayerAnimState {
+//     STOPPED_PLAYER,
+//     WALKING_PLAYER,
 
-    NUM_ANIM_STATES,
-} PlayerAnimState;
+//     NUM_ANIM_STATES,
+// } PlayerAnimState;
 
-typedef enum PlayerFacingDir {
-    DOWN_FACE_PLAYER,
-    UP_FACE_PLAYER,
-    RIGHT_FACE_PLAYER,
-    LEFT_FACE_PLAYER,
+// typedef enum PlayerFacingDir {
+//     DOWN_FACE_PLAYER,
+//     UP_FACE_PLAYER,
+//     RIGHT_FACE_PLAYER,
+//     LEFT_FACE_PLAYER,
 
-    NUM_FACE_PLAYER,
-} PlayerFacingDir;
+//     NUM_FACE_PLAYER,
+// } PlayerFacingDir;
 
-typedef struct Player {
-    Sprite **spr;
-    Vector2 position;
-    Vector2 direction;
-    float speed;
-    Rectangle hitbox_rec;
+// typedef struct Player {
+//     Sprite **spr;
+//     Vector2 position;
+//     Vector2 direction;
+//     float speed;
+//     Rectangle hitbox_rec;
 
-    PlayerFacingDir facing_direction;
-    PlayerAnimState anim_state;
-    float frame_timer;
-    float current_frame_time;
-    int current_frame;
-    Color tint;
-} Player;
+//     PlayerFacingDir facing_direction;
+//     PlayerAnimState anim_state;
+//     float frame_timer;
+//     float current_frame_time;
+//     int current_frame;
+//     Color tint;
+// } Player;
+
+// typedef struct CollisionRecs {
+//     Rectangle *recs;
+//     int num;
+// } CollisionRecs;
+
 
 void _start_animation(Player *player);
 void _stop_animation(Player *player);
 
 void _controls(Player *player);
-void _movement(Player *player, float dt);
-
-Rectangle collision_test_rec_1 = {0};
-Rectangle collision_test_rec_2 = {0};
-Rectangle collision_test_rec_3 = {0};
-Rectangle collision_list[3] = {0};
+void _movement(Player *player, CollisionRecs *collision_recs_list, float dt);
+void _collision(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs);
 
 
 Player *init_player(void) {
@@ -105,30 +108,9 @@ Player *init_player(void) {
     player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
     player->hitbox_rec = player_hitbox_rec;
 
-    // Initiating test collision rectangles (Delete latter)
-    collision_test_rec_1 = (Rectangle) {
-        .height = 200,
-        .width = 200,
-    };
-
-    collision_test_rec_2 = collision_test_rec_1;
-    collision_test_rec_2.x = (WINDOW_WIDTH/2.f) + 100;
-    collision_test_rec_2.y = player->spr[0]->texture[0].height + 20;
-
-    collision_test_rec_3 = (Rectangle) {
-        .height = 150,
-        .width = 250,
-        .x = WINDOW_WIDTH/2.f,
-        .y = WINDOW_HEIGHT - (player->spr[0]->texture[0].height + 20),
-    };
-
-    collision_list[0] = collision_test_rec_1;
-    collision_list[1] = collision_test_rec_2;
-    collision_list[2] = collision_test_rec_3;
-
     return player;
 }
-void update_player(Player *player,float dt) {
+void update_player(Player *player, CollisionRecs *collision_recs_list,float dt) {
     _controls(player);
 
     // Animation state machine
@@ -150,18 +132,13 @@ void update_player(Player *player,float dt) {
             break;
     }
 
-    _movement(player, dt);
+    _movement(player, collision_recs_list, dt);
 
     return;
 }
 void draw_player(Player *player) {
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
     draw_sprite(current_sprite, player->tint);
-
-    // Draw test collision recs (delete later)
-    DrawRectangleRec(collision_test_rec_1, RED);
-    DrawRectangleRec(collision_test_rec_2, GREEN);
-    DrawRectangleRec(collision_test_rec_3, BLUE);
 
     return;
 }
@@ -178,7 +155,7 @@ void destroy_player(Player* player) {
     return;
 }
 
-void player_collision(Player *player, char collision_mode, Rectangle* hitbox_rec_list, int num_recs) {
+void _collision(Player *player, char collision_mode, Rectangle* hitbox_rec_list, int num_recs) {
     Rectangle player_hitbox_rec = player->hitbox_rec;
     player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
     player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
@@ -248,14 +225,14 @@ void _controls(Player *player) {
     return;
 }
 
-void _movement(Player *player, float dt) {
+void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
     // Player movement
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
 
     player->hitbox_rec.x += player->direction.x * player->speed * dt;
-    player_collision(player, HORIZONTAL_COLLISION_MODE, collision_list, 3);
+    _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
-    player_collision(player, VERTICAL_COLLISION_MODE, collision_list, 3);
+    _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
 
     Vector2 half_size = {
         .x = player->hitbox_rec.width/2.f,
@@ -271,6 +248,26 @@ void _movement(Player *player, float dt) {
 
     current_sprite->dest_rec.x = player->position.x;
     current_sprite->dest_rec.y = player->position.y;
+
+    return;
+}
+
+CollisionRecs *create_collision_recs_list(Rectangle *recs, int recs_num) {
+    CollisionRecs *collision_recs_list = (CollisionRecs*) MemAlloc(sizeof(CollisionRecs));
+    collision_recs_list->num = recs_num;
+
+    collision_recs_list->recs = (Rectangle*) MemAlloc(sizeof(Rectangle) * recs_num);
+
+    for (int i=0; i<collision_recs_list->num; i++) {
+        collision_recs_list->recs[i] = recs[i];
+    }
+
+    return collision_recs_list;
+}
+
+void destroy_collision_recs_list(CollisionRecs *collision_recs_list) {
+    MemFree(collision_recs_list->recs);
+    MemFree(collision_recs_list);
 
     return;
 }

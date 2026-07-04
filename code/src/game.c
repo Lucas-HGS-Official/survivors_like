@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <raylib.h>
 
-// #include "Sprite.h"
+#include "Sprite.h"
 #include "Player.h"
 
 void game_init(void);
@@ -15,6 +15,7 @@ void _update_game(float dt);
 void _draw_game(void);
 
 static Player *player = NULL;
+static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
 
 void game_init(void) {
@@ -24,6 +25,30 @@ void game_init(void) {
     is_game_running = true;
 
     player = init_player();
+
+    // Initiating test collision rectangles (Delete latter)
+    Rectangle collision_test_rec_1 = (Rectangle) {
+        .height = 200,
+        .width = 200,
+    };
+
+    Rectangle collision_test_rec_2 = collision_test_rec_1;
+    collision_test_rec_2.x = (WINDOW_WIDTH/2.f) + 100;
+    collision_test_rec_2.y = player->spr[0]->texture[0].height + 20;
+
+    Rectangle collision_test_rec_3 = (Rectangle) {
+        .height = 150,
+        .width = 250,
+        .x = WINDOW_WIDTH/2.f,
+        .y = WINDOW_HEIGHT - (player->spr[0]->texture[0].height + 20),
+    };
+
+    Rectangle recs[3] = {
+        collision_test_rec_1,
+        collision_test_rec_2,
+        collision_test_rec_3,
+    };
+    recs_list = create_collision_recs_list(recs, 3);
 
     return;
 }
@@ -36,6 +61,7 @@ void game_loop(void) {
     return;
 }
 void game_close(void) {
+    destroy_collision_recs_list(recs_list);
     destroy_player(player);
 
     CloseAudioDevice();
@@ -45,7 +71,7 @@ void game_close(void) {
 }
 
 void _update_game(float dt) {
-    update_player(player, dt);
+    update_player(player, recs_list, dt);
 
     if (WindowShouldClose()) { is_game_running = false; }
 
@@ -56,6 +82,10 @@ void _draw_game(void) {
     ClearBackground(RAYWHITE);
 
     draw_player(player);
+
+    for (int i=0; i<recs_list->num; i++) {
+        DrawRectangleRec(recs_list->recs[i], RED);
+    }
 
     EndDrawing();
 
