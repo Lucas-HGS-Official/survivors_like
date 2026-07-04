@@ -1,11 +1,14 @@
-#include "settings.h"
+#include "game.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <raylib.h>
 
+#include "settings.h"
+
 #include "Player.h"
 #include "CollisionBoxes.h"
+#include "TileMap.h"
 
 
 void game_init(void);
@@ -15,6 +18,7 @@ void game_close(void);
 void _update_game(float dt);
 void _draw_game(void);
 
+static cute_tiled_map_t *map;
 static Player *player = NULL;
 static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
@@ -24,6 +28,8 @@ void game_init(void) {
     InitAudioDevice();
     SetTargetFPS(60);
     is_game_running = true;
+
+    map = init_tilemap();
 
     player = init_player();
 
@@ -57,6 +63,8 @@ void game_close(void) {
 
     CloseAudioDevice();
     CloseWindow();
+
+    destroy_tilemap(map);
 
     return;
 }
