@@ -6,6 +6,7 @@
 #include "settings.h"
 #include "Sprite.h"
 
+
 // All player animations have for 4 frames
 #define NUM_FRAMES 4
 #define HORIZONTAL_WHITE_SPACE_PLAYER_SPR 120
@@ -14,41 +15,36 @@
 #define VERTICAL_COLLISION_MODE 'v'
 
 
-// typedef enum PlayerAnimState {
-//     STOPPED_PLAYER,
-//     WALKING_PLAYER,
+typedef enum PlayerAnimState {
+    STOPPED_PLAYER,
+    WALKING_PLAYER,
 
-//     NUM_ANIM_STATES,
-// } PlayerAnimState;
+    NUM_ANIM_STATES,
+} PlayerAnimState;
 
-// typedef enum PlayerFacingDir {
-//     DOWN_FACE_PLAYER,
-//     UP_FACE_PLAYER,
-//     RIGHT_FACE_PLAYER,
-//     LEFT_FACE_PLAYER,
+typedef enum PlayerFacingDir {
+    DOWN_FACE_PLAYER,
+    UP_FACE_PLAYER,
+    RIGHT_FACE_PLAYER,
+    LEFT_FACE_PLAYER,
 
-//     NUM_FACE_PLAYER,
-// } PlayerFacingDir;
+    NUM_FACE_PLAYER,
+} PlayerFacingDir;
 
-// typedef struct Player {
-//     Sprite **spr;
-//     Vector2 position;
-//     Vector2 direction;
-//     float speed;
-//     Rectangle hitbox_rec;
+typedef struct Player {
+    Sprite **spr;
+    Vector2 position;
+    Vector2 direction;
+    float speed;
+    Rectangle hitbox_rec;
 
-//     PlayerFacingDir facing_direction;
-//     PlayerAnimState anim_state;
-//     float frame_timer;
-//     float current_frame_time;
-//     int current_frame;
-//     Color tint;
-// } Player;
-
-// typedef struct CollisionRecs {
-//     Rectangle *recs;
-//     int num;
-// } CollisionRecs;
+    PlayerFacingDir facing_direction;
+    PlayerAnimState anim_state;
+    float frame_timer;
+    float current_frame_time;
+    int current_frame;
+    Color tint;
+} Player;
 
 
 void _start_animation(Player *player);
@@ -249,26 +245,6 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
 
     current_sprite->dest_rec.x = player->position.x;
     current_sprite->dest_rec.y = player->position.y;
-
-    return;
-}
-
-CollisionRecs *create_collision_recs_list(Rectangle *recs, int recs_num) {
-    CollisionRecs *collision_recs_list = (CollisionRecs*) MemAlloc(sizeof(CollisionRecs));
-    collision_recs_list->num = recs_num;
-
-    collision_recs_list->recs = (Rectangle*) MemAlloc(sizeof(Rectangle) * recs_num);
-
-    for (int i=0; i<collision_recs_list->num; i++) {
-        collision_recs_list->recs[i] = recs[i];
-    }
-
-    return collision_recs_list;
-}
-
-void destroy_collision_recs_list(CollisionRecs *collision_recs_list) {
-    MemFree(collision_recs_list->recs);
-    MemFree(collision_recs_list);
 
     return;
 }

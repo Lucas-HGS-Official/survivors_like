@@ -4,8 +4,9 @@
 #include <stdlib.h>
 #include <raylib.h>
 
-#include "Sprite.h"
 #include "Player.h"
+#include "CollisionBoxes.h"
+
 
 void game_init(void);
 void game_loop(void);
@@ -27,21 +28,11 @@ void game_init(void) {
     player = init_player();
 
     // Initiating test collision rectangles (Delete latter)
-    Rectangle collision_test_rec_1 = (Rectangle) {
-        .height = 200,
-        .width = 200,
-    };
+    Rectangle collision_test_rec_1 = (Rectangle) { .x= 0, .y= 0, .width=200, .height=200 };
 
-    Rectangle collision_test_rec_2 = collision_test_rec_1;
-    collision_test_rec_2.x = (WINDOW_WIDTH/2.f) + 100;
-    collision_test_rec_2.y = player->spr[0]->texture[0].height + 20;
+    Rectangle collision_test_rec_2 = (Rectangle) { .x=740, .y=148, .width=200, .height=200 };
 
-    Rectangle collision_test_rec_3 = (Rectangle) {
-        .height = 150,
-        .width = 250,
-        .x = WINDOW_WIDTH/2.f,
-        .y = WINDOW_HEIGHT - (player->spr[0]->texture[0].height + 20),
-    };
+    Rectangle collision_test_rec_3 = (Rectangle) { .x=640, .y=572, .width=250, .height=150 };
 
     Rectangle recs[3] = {
         collision_test_rec_1,
