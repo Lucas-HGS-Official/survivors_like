@@ -2,13 +2,13 @@
 
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 #include "settings.h"
 #include "Sprite.h"
 
 // All player animations have for 4 frames
 #define NUM_FRAMES 4
+#define HORIZONTAL_WHITE_SPACE_PLAYER_SPR 120
 
 #define HORIZONTAL_COLLISION_MODE 'h'
 #define VERTICAL_COLLISION_MODE 'v'
@@ -104,7 +104,8 @@ Player *init_player(void) {
 
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
     Rectangle player_hitbox_rec = current_sprite->dest_rec;
-    player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
+    player_hitbox_rec.x -= player_hitbox_rec.width/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
+    player_hitbox_rec.width -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
     player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
     player->hitbox_rec = player_hitbox_rec;
 
