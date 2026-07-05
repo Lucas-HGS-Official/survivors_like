@@ -18,7 +18,7 @@ void game_close(void);
 void _update_game(float dt);
 void _draw_game(void);
 
-static cute_tiled_map_t *map;
+static Tilemap *map;
 static Player *player = NULL;
 static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
@@ -80,11 +80,13 @@ void _draw_game(void) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
+    draw_tilemap(map);
+
     draw_player(player);
 
-    for (int i=0; i<recs_list->num; i++) {
-        DrawRectangleRec(recs_list->recs[i], RED);
-    }
+    // for (int i=0; i<recs_list->num; i++) {
+    //     DrawRectangleRec(recs_list->recs[i], RED);
+    // }
 
     EndDrawing();
 

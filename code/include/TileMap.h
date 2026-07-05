@@ -5,5 +5,9 @@
 #include <raylib.h>
 
 
-cute_tiled_map_t *init_tilemap(void);
-void destroy_tilemap(cute_tiled_map_t *map);
+typedef struct Tilemap Tilemap;
+
+Tilemap *init_tilemap(void);
+void update_tilemap(Tilemap *map);
+void draw_tilemap(Tilemap *map);
+void destroy_tilemap(Tilemap *map);
