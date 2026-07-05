@@ -8,10 +8,6 @@
 #include "Sprite.h"
 
 
-typedef struct Tile {
-    int id;
-} Tile;
-
 typedef struct Tilemap {
     Sprite tileset;
     cute_tiled_map_t *tilemap;
@@ -22,9 +18,6 @@ typedef struct Tilemap {
     cute_tiled_tileset_t *tileset_data;
     int cols;
     int rows;
-
-
-    Tile current_tile;
 } Tilemap;
 
 
@@ -39,8 +32,6 @@ Tilemap *init_tilemap(void) {
     map->tileset_data = map->tilemap->tilesets;
     map->cols = map->tileset_data->columns;
     map->rows = map->tileset_data->tilecount/map->cols;
-
-    map->current_tile.id = *map->tilemap_data;
 
     init_sprite(&map->tileset, "resources/data/graphics/tilesets/world_tileset.png");
     map->tileset.origin = (Vector2) {0};
@@ -59,8 +50,29 @@ void update_tilemap(Tilemap *map) {
 }
 
 void draw_tilemap(Tilemap *map) {
+    cute_tiled_layer_t *current_layer = map->layer;
 
-    draw_sprite(&map->tileset, WHITE);
+    while (current_layer) {
+        if(TextIsEqual("Ground", map->layer->name.ptr)) {
+            for (int i=0; i<current_layer->data_count; i++) {
+                // Picking the tile from the tileset
+                int tile_id = map->tilemap_data[i]-1;
+                int tile_col = tile_id % map->cols;
+                int tile_row = tile_id / map->cols;
+                map->tileset.src_rec.x = map->tileset.src_rec.width * tile_col;
+                map->tileset.src_rec.y = map->tileset.src_rec.height * tile_row;
+
+                // Placing the tile in the tilemap
+                int map_current_col = i % map->layer->width;
+                int map_current_row = i / map->layer->width;
+                map->tileset.dest_rec.x = map->tileset.dest_rec.width * map_current_col;
+                map->tileset.dest_rec.y = map->tileset.dest_rec.height * map_current_row;
+
+                draw_sprite(&map->tileset, WHITE);
+            }
+        }
+        current_layer = current_layer->next;
+    }
 
     return;
 }

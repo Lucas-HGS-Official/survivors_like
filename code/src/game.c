@@ -33,19 +33,20 @@ void game_init(void) {
 
     player = init_player();
 
-    // Initiating test collision rectangles (Delete latter)
-    Rectangle collision_test_rec_1 = (Rectangle) { .x= 0, .y= 0, .width=200, .height=200 };
+    // // Initiating test collision rectangles (Delete latter)
+    // Rectangle collision_test_rec_1 = (Rectangle) { .x= 0, .y= 0, .width=200, .height=200 };
 
-    Rectangle collision_test_rec_2 = (Rectangle) { .x=740, .y=148, .width=200, .height=200 };
+    // Rectangle collision_test_rec_2 = (Rectangle) { .x=740, .y=148, .width=200, .height=200 };
 
-    Rectangle collision_test_rec_3 = (Rectangle) { .x=640, .y=572, .width=250, .height=150 };
+    // Rectangle collision_test_rec_3 = (Rectangle) { .x=640, .y=572, .width=250, .height=150 };
 
-    Rectangle recs[3] = {
-        collision_test_rec_1,
-        collision_test_rec_2,
-        collision_test_rec_3,
-    };
-    recs_list = create_collision_recs_list(recs, 3);
+    // Rectangle recs[3] = {
+    //     collision_test_rec_1,
+    //     collision_test_rec_2,
+    //     collision_test_rec_3,
+    // };
+    Rectangle recs[1] = {0};
+    recs_list = create_collision_recs_list(recs, 1);
 
     return;
 }
