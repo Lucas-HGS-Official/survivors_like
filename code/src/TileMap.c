@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <raylib.h>
+#include <stdio.h>
 #define CUTE_TILED_IMPLEMENTATION
 #include "cute_tiled.h"
 
@@ -89,6 +90,7 @@ Tilemap *init_tilemap(void) {
         map_obj_list[i].gid = i + GRASSROCK1;
         map_obj_list[i].type = map_obj_type_list[i];
         init_sprite(&map_obj_list[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map_obj_list[i].type));
+        map_obj_list[i].spr.origin = (Vector2) {0};
     }
 
     return map;
@@ -136,7 +138,7 @@ void draw_tilemap(Tilemap *map) {
                     for (int i=0; i<OBJECTS_GID_NUM; i++) {
                         if (map_obj_list[i].gid == current_obj->gid) {
                             map_obj_list[i].spr.dest_rec.x = current_obj->x;
-                            map_obj_list[i].spr.dest_rec.y = current_obj->y;
+                            map_obj_list[i].spr.dest_rec.y = current_obj->y - current_obj->height;
 
                             draw_sprite(&map_obj_list[i].spr, WHITE);
                         }

@@ -2100,8 +2100,8 @@
                  "type":"green_tree_small",
                  "visible":true,
                  "width":64,
-                 "x":569.333,
-                 "y":629.333
+                 "x":585.333,
+                 "y":631.999666666667
                 }, 
                 {
                  "gid":215,
@@ -2201,7 +2201,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":175,
+ "nextobjectid":177,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
