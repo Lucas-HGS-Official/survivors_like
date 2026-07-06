@@ -8,6 +8,26 @@
 #include "Sprite.h"
 
 
+typedef enum ObjectsGID {
+    GRASSROCK1 = 211,
+    GRASSROCK2,
+    GREEN_TREE,
+    GREEN_TREE_BUSHY,
+    GREEN_TREE_SMALL,
+    ICE_TREE,
+    RUIN_PILLAR,
+    RUIN_PILLAR_BROKE,
+    RUIN_PILLAR_BROKE_ALT,
+    SANDROCK1,
+    SANDROCK2,
+    PALM,
+    PALM_ALT,
+    PALM_SMALL,
+
+    OBJECTS_GID_NUM = PALM_SMALL-GRASSROCK1 +1,
+} ObjectsGID;
+
+
 typedef struct Tilemap {
     Sprite tileset;
     cute_tiled_map_t *tilemap;
@@ -18,6 +38,15 @@ typedef struct Tilemap {
     cute_tiled_tileset_t *tileset_data;
     int cols;
 } Tilemap;
+
+typedef struct MapObj {
+    ObjectsGID gid;
+    char *type;
+    Sprite spr;
+} MapObj;
+
+
+static MapObj map_obj_list[OBJECTS_GID_NUM] = {0};
 
 
 Tilemap *init_tilemap(void) {
@@ -39,6 +68,29 @@ Tilemap *init_tilemap(void) {
     };
     map->tileset.dest_rec = map->tileset.src_rec;
 
+    char *map_obj_type_list[OBJECTS_GID_NUM] = {
+        "grassrock1",
+        "grassrock2",
+        "green_tree",
+        "green_tree_bushy",
+        "green_tree_small",
+        "ice_tree",
+        "ruin_pillar",
+        "ruin_pillar_broke",
+        "ruin_pillar_broke_alt",
+        "sandrock1",
+        "sandrock2",
+        "palm",
+        "palm_alt",
+        "palm_small",
+    };
+
+    for (int i=0; i<OBJECTS_GID_NUM; i++) {
+        map_obj_list[i].gid = i + GRASSROCK1;
+        map_obj_list[i].type = map_obj_type_list[i];
+        init_sprite(&map_obj_list[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map_obj_list[i].type));
+    }
+
     return map;
 }
 
@@ -50,8 +102,13 @@ void update_tilemap(Tilemap *map) {
 void draw_tilemap(Tilemap *map) {
     cute_tiled_layer_t *current_layer = map->layer;
 
+    // current_layer->type.ptr
+    // tilelayer  0
+    // objectgroup  1
+    // objectgroup  2
+    // objectgroup  3
     while (current_layer) {
-        if(TextIsEqual("Ground", map->layer->name.ptr)) {
+        if(TextIsEqual("tilelayer", current_layer->type.ptr)) {
             for (int i=0; i<current_layer->data_count; i++) {
                 // Picking the tile from the tileset
                 int tile_id = map->tilemap_data[i]-1;
@@ -68,6 +125,26 @@ void draw_tilemap(Tilemap *map) {
 
                 draw_sprite(&map->tileset, WHITE);
             }
+        } else if (TextIsEqual("objectgroup", current_layer->type.ptr)) {
+            // current_layer->name.ptr
+            // Entities
+            // Collisions
+            // Objects
+            if (TextIsEqual("Objects", current_layer->name.ptr)) {
+                cute_tiled_object_t *current_obj = current_layer->objects;
+                while (current_obj) {
+                    for (int i=0; i<OBJECTS_GID_NUM; i++) {
+                        if (map_obj_list[i].gid == current_obj->gid) {
+                            map_obj_list[i].spr.dest_rec.x = current_obj->x;
+                            map_obj_list[i].spr.dest_rec.y = current_obj->y;
+
+                            draw_sprite(&map_obj_list[i].spr, WHITE);
+                        }
+                    }
+
+                    current_obj = current_obj->next;
+                }
+            }
         }
         current_layer = current_layer->next;
     }
@@ -76,6 +153,9 @@ void draw_tilemap(Tilemap *map) {
 }
 
 void destroy_tilemap(Tilemap *map) {
+    for (int i=0; i<OBJECTS_GID_NUM; i++) {
+        destroy_sprite(&map_obj_list[i].spr);
+    }
     destroy_sprite(&map->tileset);
     cute_tiled_free_map(map->tilemap);
     MemFree(map);
