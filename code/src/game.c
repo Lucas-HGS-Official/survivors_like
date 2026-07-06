@@ -45,7 +45,9 @@ void game_init(void) {
     //     collision_test_rec_2,
     //     collision_test_rec_3,
     // };
-    Rectangle recs[1] = {0};
+
+    // Initiating all collision boxes (Must have at least 1)
+    Rectangle recs[1] = {0}; // empty collision box
     recs_list = create_collision_recs_list(recs, 1);
 
     return;
@@ -82,12 +84,7 @@ void _draw_game(void) {
     ClearBackground(RAYWHITE);
 
     draw_tilemap(map);
-
     draw_player(player);
-
-    // for (int i=0; i<recs_list->num; i++) {
-    //     DrawRectangleRec(recs_list->recs[i], RED);
-    // }
 
     EndDrawing();
 

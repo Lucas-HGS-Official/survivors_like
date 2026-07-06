@@ -2,8 +2,8 @@
 
 #include <assert.h>
 #include <raylib.h>
-#include "cute_tiled.h"
 #define CUTE_TILED_IMPLEMENTATION
+#include "cute_tiled.h"
 
 #include "Sprite.h"
 
@@ -17,7 +17,6 @@ typedef struct Tilemap {
 
     cute_tiled_tileset_t *tileset_data;
     int cols;
-    int rows;
 } Tilemap;
 
 
@@ -31,7 +30,6 @@ Tilemap *init_tilemap(void) {
     map->tilemap_data = map->layer->data;
     map->tileset_data = map->tilemap->tilesets;
     map->cols = map->tileset_data->columns;
-    map->rows = map->tileset_data->tilecount/map->cols;
 
     init_sprite(&map->tileset, "resources/data/graphics/tilesets/world_tileset.png");
     map->tileset.origin = (Vector2) {0};
@@ -62,7 +60,7 @@ void draw_tilemap(Tilemap *map) {
                 map->tileset.src_rec.x = map->tileset.src_rec.width * tile_col;
                 map->tileset.src_rec.y = map->tileset.src_rec.height * tile_row;
 
-                // Placing the tile in the tilemap
+                // Placing the tile in the tilemap grid
                 int map_current_col = i % map->layer->width;
                 int map_current_row = i / map->layer->width;
                 map->tileset.dest_rec.x = map->tileset.dest_rec.width * map_current_col;
