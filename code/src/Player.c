@@ -253,8 +253,8 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
         .x = player->hitbox_rec.width/2.f,
         .y = player->hitbox_rec.height/2.f,
     };
-    player->hitbox_rec.x = Clamp(player->hitbox_rec.x, half_size.x, WINDOW_WIDTH - half_size.x);
-    player->hitbox_rec.y = Clamp(player->hitbox_rec.y, half_size.y, WINDOW_HEIGHT - half_size.y);
+    // player->hitbox_rec.x = Clamp(player->hitbox_rec.x, half_size.x, WINDOW_WIDTH - half_size.x);
+    // player->hitbox_rec.y = Clamp(player->hitbox_rec.y, half_size.y, WINDOW_HEIGHT - half_size.y);
 
     player->position = (Vector2) {
         .x = player->hitbox_rec.x,
