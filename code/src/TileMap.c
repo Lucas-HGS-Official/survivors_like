@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <raylib.h>
-#include <stdio.h>
 #define CUTE_TILED_IMPLEMENTATION
 #include "cute_tiled.h"
 
@@ -41,13 +40,20 @@ typedef struct Tilemap {
 } Tilemap;
 
 typedef struct MapObj {
+    Sprite spr;
     ObjectsGID gid;
     char *type;
-    Sprite spr;
 } MapObj;
+
+typedef struct MapObjBlock {
+    Rectangle dest_rec;
+    ObjectsGID gid;
+} MapObjBlock;
 
 
 static MapObj map_obj_list[OBJECTS_GID_NUM] = {0};
+static MapObjBlock *map_obj_block_list = NULL;
+static int map_obj_block_list_size = 0;
 
 
 Tilemap *init_tilemap(void) {
@@ -93,6 +99,34 @@ Tilemap *init_tilemap(void) {
         map_obj_list[i].spr.origin = (Vector2) {0};
     }
 
+    cute_tiled_layer_t *current_layer = map->layer;
+    while (current_layer) {
+        if (TextIsEqual("objectgroup", current_layer->type.ptr)) {
+            if (TextIsEqual("Objects", current_layer->name.ptr)) {
+                int i=0;
+                cute_tiled_object_t *current_obj = current_layer->objects;
+                while (current_obj) {
+                    i++;
+                    current_obj = current_obj->next;
+                }
+
+                map_obj_block_list = (MapObjBlock*)MemAlloc(sizeof(MapObjBlock) * i);
+                map_obj_block_list_size = i;
+                cute_tiled_object_t *obj = current_layer->objects;
+                for (i--; i>=0; i--) {
+                    map_obj_block_list[i].gid = obj->gid;
+                    map_obj_block_list[i].dest_rec = (Rectangle) {
+                        .x = obj->x, .y = obj->y,
+                        .width = obj->width, .height = obj->height,
+                    };
+
+                    obj = obj->next;
+                }
+            }
+        }
+        current_layer = current_layer->next;
+    }
+
     return map;
 }
 
@@ -133,18 +167,15 @@ void draw_tilemap(Tilemap *map) {
             // Collisions
             // Objects
             if (TextIsEqual("Objects", current_layer->name.ptr)) {
-                cute_tiled_object_t *current_obj = current_layer->objects;
-                while (current_obj) {
-                    for (int i=0; i<OBJECTS_GID_NUM; i++) {
-                        if (map_obj_list[i].gid == current_obj->gid) {
-                            map_obj_list[i].spr.dest_rec.x = current_obj->x;
-                            map_obj_list[i].spr.dest_rec.y = current_obj->y - current_obj->height;
+                for (int i=0; i<map_obj_block_list_size; i++) {
+                    for (int j=0; j<OBJECTS_GID_NUM; j++) {
+                        if (map_obj_list[j].gid == map_obj_block_list[i].gid) {
+                            map_obj_list[j].spr.dest_rec = map_obj_block_list[i].dest_rec;
+                            map_obj_list[j].spr.dest_rec.y -= map_obj_list[j].spr.dest_rec.height;
 
-                            draw_sprite(&map_obj_list[i].spr, WHITE);
+                            draw_sprite(&map_obj_list[j].spr, WHITE);
                         }
                     }
-
-                    current_obj = current_obj->next;
                 }
             }
         }
@@ -158,6 +189,7 @@ void destroy_tilemap(Tilemap *map) {
     for (int i=0; i<OBJECTS_GID_NUM; i++) {
         destroy_sprite(&map_obj_list[i].spr);
     }
+    MemFree(map_obj_block_list);
     destroy_sprite(&map->tileset);
     cute_tiled_free_map(map->tilemap);
     MemFree(map);
