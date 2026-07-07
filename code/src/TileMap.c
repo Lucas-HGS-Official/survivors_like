@@ -98,7 +98,7 @@ Tilemap *init_tilemap(void) {
                 cute_tiled_object_t *obj = current_layer->objects;
                 for (int i=0; i<map->invisible_recs_size; i++) {
                     map->invisible_recs[i] = (Rectangle) {
-                        .x=obj->x, .y = obj->y - obj->height,
+                        .x=obj->x, .y = obj->y,
                         .width=obj->width, .height=obj->height,
                     };
                     obj = obj->next;
