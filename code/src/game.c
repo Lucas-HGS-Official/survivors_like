@@ -22,6 +22,7 @@ static Tilemap *map;
 static Player *player = NULL;
 static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
+static Camera2D *camera = NULL;
 
 void game_init(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_NAME);
@@ -33,6 +34,7 @@ void game_init(void) {
     recs_list = map->collision_rec_list;
 
     player = init_player();
+    camera = init_player_camera(player);
 
     return;
 }
@@ -45,6 +47,8 @@ void game_loop(void) {
     return;
 }
 void game_close(void) {
+    MemFree(camera);
+
     destroy_collision_recs_list(recs_list);
     destroy_player(player);
 
@@ -58,6 +62,7 @@ void game_close(void) {
 
 void _update_game(float dt) {
     update_player(player, recs_list, dt);
+    update_player_camera(camera, player);
 
     if (WindowShouldClose()) { is_game_running = false; }
 
@@ -65,11 +70,13 @@ void _update_game(float dt) {
 }
 void _draw_game(void) {
     BeginDrawing();
+    BeginMode2D(*camera);
     ClearBackground(RAYWHITE);
 
     draw_tilemap(map);
     draw_player(player);
 
+    EndMode2D();
     EndDrawing();
 
     return;

@@ -108,6 +108,15 @@ Player *init_player(void) {
 
     return player;
 }
+Camera2D *init_player_camera(Player *player) {
+    Camera2D *camera = (Camera2D*)MemAlloc(sizeof(Camera2D));
+    camera->target = player->position;
+    camera->offset = (Vector2){ .x=WINDOW_WIDTH/2.0f, .y=WINDOW_HEIGHT/2.0f };
+    camera->rotation = 0.0f;
+    camera->zoom = 1.0f;
+
+    return camera;
+}
 void update_player(Player *player, CollisionRecs *collision_recs_list,float dt) {
     _controls(player);
 
@@ -131,6 +140,11 @@ void update_player(Player *player, CollisionRecs *collision_recs_list,float dt) 
     }
 
     _movement(player, collision_recs_list, dt);
+
+    return;
+}
+void update_player_camera(Camera2D *camera, Player *player) {
+    camera->target = player->position;
 
     return;
 }
