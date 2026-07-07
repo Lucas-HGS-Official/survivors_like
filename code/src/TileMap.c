@@ -28,17 +28,6 @@ typedef enum ObjectsGID {
 } ObjectsGID;
 
 
-typedef struct Tilemap {
-    Sprite tileset;
-    cute_tiled_map_t *tilemap;
-
-    cute_tiled_layer_t *layer;
-    int *tilemap_data;
-
-    cute_tiled_tileset_t *tileset_data;
-    int cols;
-} Tilemap;
-
 typedef struct MapObj {
     Sprite spr;
     ObjectsGID gid;
@@ -50,10 +39,20 @@ typedef struct MapObjBlock {
     ObjectsGID gid;
 } MapObjBlock;
 
+typedef struct Tilemap {
+    Sprite tileset;
+    cute_tiled_map_t *tilemap;
 
-static MapObj map_obj_list[OBJECTS_GID_NUM] = {0};
-static MapObjBlock *map_obj_block_list = NULL;
-static int map_obj_block_list_size = 0;
+    cute_tiled_layer_t *layer;
+    int *tilemap_data;
+
+    cute_tiled_tileset_t *tileset_data;
+    int cols;
+
+    MapObj obj_types[OBJECTS_GID_NUM];
+    MapObjBlock *obj_blocks;
+    int obj_blocks_size;
+} Tilemap;
 
 
 Tilemap *init_tilemap(void) {
@@ -93,10 +92,10 @@ Tilemap *init_tilemap(void) {
     };
 
     for (int i=0; i<OBJECTS_GID_NUM; i++) {
-        map_obj_list[i].gid = i + GRASSROCK1;
-        map_obj_list[i].type = map_obj_type_list[i];
-        init_sprite(&map_obj_list[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map_obj_list[i].type));
-        map_obj_list[i].spr.origin = (Vector2) {0};
+        map->obj_types[i].gid = i + GRASSROCK1;
+        map->obj_types[i].type = map_obj_type_list[i];
+        init_sprite(&map->obj_types[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map->obj_types[i].type));
+        map->obj_types[i].spr.origin = (Vector2) {0};
     }
 
     cute_tiled_layer_t *current_layer = map->layer;
@@ -110,13 +109,13 @@ Tilemap *init_tilemap(void) {
                     current_obj = current_obj->next;
                 }
 
-                map_obj_block_list = (MapObjBlock*)MemAlloc(sizeof(MapObjBlock) * i);
-                map_obj_block_list_size = i;
+                map->obj_blocks = (MapObjBlock*)MemAlloc(sizeof(MapObjBlock) * i);
+                map->obj_blocks_size = i;
                 cute_tiled_object_t *obj = current_layer->objects;
                 for (i--; i>=0; i--) {
-                    map_obj_block_list[i].gid = obj->gid;
-                    map_obj_block_list[i].dest_rec = (Rectangle) {
-                        .x = obj->x, .y = obj->y,
+                    map->obj_blocks[i].gid = obj->gid;
+                    map->obj_blocks[i].dest_rec = (Rectangle) {
+                        .x = obj->x, .y = obj->y - obj->height,
                         .width = obj->width, .height = obj->height,
                     };
 
@@ -134,6 +133,12 @@ void update_tilemap(Tilemap *map) {
 
     return;
 }
+
+// Rectangle *get_obj_block_collision_recs(Tilemap *map) {
+//     Rectangle *collision_recs = MemAlloc(sizeof(Rectangle)*map->obj_blocks_size);
+
+//     return collision_recs;
+// }
 
 void draw_tilemap(Tilemap *map) {
     cute_tiled_layer_t *current_layer = map->layer;
@@ -167,13 +172,12 @@ void draw_tilemap(Tilemap *map) {
             // Collisions
             // Objects
             if (TextIsEqual("Objects", current_layer->name.ptr)) {
-                for (int i=0; i<map_obj_block_list_size; i++) {
+                for (int i=0; i<map->obj_blocks_size; i++) {
                     for (int j=0; j<OBJECTS_GID_NUM; j++) {
-                        if (map_obj_list[j].gid == map_obj_block_list[i].gid) {
-                            map_obj_list[j].spr.dest_rec = map_obj_block_list[i].dest_rec;
-                            map_obj_list[j].spr.dest_rec.y -= map_obj_list[j].spr.dest_rec.height;
+                        if (map->obj_types[j].gid == map->obj_blocks[i].gid) {
+                            map->obj_types[j].spr.dest_rec = map->obj_blocks[i].dest_rec;
 
-                            draw_sprite(&map_obj_list[j].spr, WHITE);
+                            draw_sprite(&map->obj_types[j].spr, WHITE);
                         }
                     }
                 }
@@ -187,9 +191,9 @@ void draw_tilemap(Tilemap *map) {
 
 void destroy_tilemap(Tilemap *map) {
     for (int i=0; i<OBJECTS_GID_NUM; i++) {
-        destroy_sprite(&map_obj_list[i].spr);
+        destroy_sprite(&map->obj_types[i].spr);
     }
-    MemFree(map_obj_block_list);
+    MemFree(map->obj_blocks);
     destroy_sprite(&map->tileset);
     cute_tiled_free_map(map->tilemap);
     MemFree(map);

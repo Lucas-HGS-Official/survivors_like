@@ -30,6 +30,7 @@ void game_init(void) {
     is_game_running = true;
 
     map = init_tilemap();
+    // Rectangle *
 
     player = init_player();
 
