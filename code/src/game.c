@@ -30,7 +30,7 @@ void game_init(void) {
     is_game_running = true;
 
     map = init_tilemap();
-    recs_list = map->obj_blocks_hitboxes;
+    recs_list = map->collision_rec_list;
 
     player = init_player();
 
@@ -48,10 +48,10 @@ void game_close(void) {
     destroy_collision_recs_list(recs_list);
     destroy_player(player);
 
+    destroy_tilemap(map);
+
     CloseAudioDevice();
     CloseWindow();
-
-    destroy_tilemap(map);
 
     return;
 }

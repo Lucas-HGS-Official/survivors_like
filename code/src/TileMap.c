@@ -9,54 +9,6 @@
 #include "CollisionBoxes.h"
 
 
-// typedef enum ObjectsGID {
-//     GRASSROCK1 = 211,
-//     GRASSROCK2,
-//     GREEN_TREE,
-//     GREEN_TREE_BUSHY,
-//     GREEN_TREE_SMALL,
-//     ICE_TREE,
-//     RUIN_PILLAR,
-//     RUIN_PILLAR_BROKE,
-//     RUIN_PILLAR_BROKE_ALT,
-//     SANDROCK1,
-//     SANDROCK2,
-//     PALM,
-//     PALM_ALT,
-//     PALM_SMALL,
-
-//     OBJECTS_GID_NUM = PALM_SMALL-GRASSROCK1 +1,
-// } ObjectsGID;
-
-
-// typedef struct MapObj {
-//     Sprite spr;
-//     ObjectsGID gid;
-//     char *type;
-// } MapObj;
-
-// typedef struct MapObjBlock {
-//     Rectangle dest_rec;
-//     ObjectsGID gid;
-// } MapObjBlock;
-
-// typedef struct Tilemap {
-//     Sprite tileset;
-//     cute_tiled_map_t *tilemap;
-
-//     cute_tiled_layer_t *layer;
-//     int *tilemap_data;
-
-//     cute_tiled_tileset_t *tileset_data;
-//     int cols;
-
-//     MapObj obj_types[OBJECTS_GID_NUM];
-//     MapObjBlock *obj_blocks;
-//     int obj_blocks_size;
-//     CollisionRecs *obj_blocks_hitboxes;
-// } Tilemap;
-
-
 Rectangle *_alloc_map_collision_recs(Tilemap *map);
 void _free_map_collision_recs(Rectangle *collision_recs);
 
@@ -103,19 +55,24 @@ Tilemap *init_tilemap(void) {
         map->obj_types[i].spr.origin = (Vector2) {0};
     }
 
+    map->collission_rec_list_size = 0;
+
     cute_tiled_layer_t *current_layer = map->layer;
     while (current_layer) {
         if (TextIsEqual("objectgroup", current_layer->type.ptr)) {
             if (TextIsEqual("Objects", current_layer->name.ptr)) {
                 int i=0;
-                cute_tiled_object_t *current_obj = current_layer->objects;
-                while (current_obj) {
+                for (
+                        cute_tiled_object_t *obj = current_layer->objects;
+                        obj;
+                        obj = obj->next
+                    ) {
                     i++;
-                    current_obj = current_obj->next;
                 }
 
                 map->obj_blocks = (MapObjBlock*)MemAlloc(sizeof(MapObjBlock) * i);
                 map->obj_blocks_size = i;
+                map->collission_rec_list_size += i;
                 cute_tiled_object_t *obj = current_layer->objects;
                 for (i--; i>=0; i--) {
                     map->obj_blocks[i].gid = obj->gid;
@@ -123,7 +80,27 @@ Tilemap *init_tilemap(void) {
                         .x = obj->x, .y = obj->y - obj->height,
                         .width = obj->width, .height = obj->height,
                     };
+                    obj = obj->next;
+                }
 
+            } else if (TextIsEqual("Collisions", current_layer->name.ptr)) {
+                int i=0;
+                for (
+                        cute_tiled_object_t *obj = current_layer->objects;
+                        obj;
+                        obj = obj->next
+                    ) {
+                    i++;
+                }
+                map->invisible_recs = (Rectangle*)MemAlloc(sizeof(Rectangle) * i);
+                map->invisible_recs_size = i;
+                map->collission_rec_list_size += i;
+                cute_tiled_object_t *obj = current_layer->objects;
+                for (int i=0; i<map->invisible_recs_size; i++) {
+                    map->invisible_recs[i] = (Rectangle) {
+                        .x=obj->x, .y = obj->y - obj->height,
+                        .width=obj->width, .height=obj->height,
+                    };
                     obj = obj->next;
                 }
             }
@@ -131,7 +108,7 @@ Tilemap *init_tilemap(void) {
         current_layer = current_layer->next;
     }
     Rectangle *recs =_alloc_map_collision_recs(map);
-    map->obj_blocks_hitboxes = create_collision_recs_list(recs, map->obj_blocks_size);
+    map->collision_rec_list = create_collision_recs_list(recs, map->collission_rec_list_size);
     _free_map_collision_recs(recs);
 
     return map;
@@ -192,7 +169,6 @@ void draw_tilemap(Tilemap *map) {
 }
 
 void destroy_tilemap(Tilemap *map) {
-    destroy_collision_recs_list(map->obj_blocks_hitboxes);
     for (int i=0; i<OBJECTS_GID_NUM; i++) {
         destroy_sprite(&map->obj_types[i].spr);
     }
@@ -205,10 +181,13 @@ void destroy_tilemap(Tilemap *map) {
 }
 
 Rectangle *_alloc_map_collision_recs(Tilemap *map) {
-    Rectangle *collision_recs = MemAlloc(sizeof(Rectangle) * map->obj_blocks_size);
+    Rectangle *collision_recs = MemAlloc(sizeof(Rectangle) * (map->obj_blocks_size + map->invisible_recs_size));
 
     for (int i=0; i<map->obj_blocks_size; i++) {
         collision_recs[i] = map->obj_blocks[i].dest_rec;
+    }
+    for (int i=0; i<map->invisible_recs_size; i++) {
+        collision_recs[map->obj_blocks_size+i] = map->invisible_recs[i];
     }
 
     return collision_recs;

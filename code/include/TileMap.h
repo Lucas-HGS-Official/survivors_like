@@ -51,7 +51,12 @@ typedef struct Tilemap {
     MapObj obj_types[OBJECTS_GID_NUM];
     MapObjBlock *obj_blocks;
     int obj_blocks_size;
-    CollisionRecs *obj_blocks_hitboxes;
+
+    Rectangle *invisible_recs;
+    int invisible_recs_size;
+
+    CollisionRecs *collision_rec_list;
+    int collission_rec_list_size;
 } Tilemap;
 
 
