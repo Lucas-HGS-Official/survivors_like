@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
 
 #include "settings.h"
 #include "Sprite.h"
@@ -152,7 +153,10 @@ void destroy_player(Player* player) {
     return;
 }
 
-void _collision(Player *player, char collision_mode, Rectangle* hitbox_rec_list, int num_recs) {
+void _collision(Player *player, char collision_mode, Rectangle *hitbox_rec_list, int num_recs) {
+    if (hitbox_rec_list == NULL) {
+        return;
+    }
     Rectangle player_hitbox_rec = player->hitbox_rec;
     player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
     player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
