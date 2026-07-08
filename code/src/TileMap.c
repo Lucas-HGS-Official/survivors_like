@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <raylib.h>
+#include <stdlib.h>
 #define CUTE_TILED_IMPLEMENTATION
 #include "cute_tiled.h"
 
@@ -13,6 +14,8 @@ Rectangle *_alloc_map_collision_recs(Tilemap *map);
 void _free_map_collision_recs(Rectangle *collision_recs);
 void _load_tiled_tilemap(Tilemap *map);
 void _load_tiled_obj_sprites(Tilemap *map);
+
+static int _comp_y_value(const void * elem1, const void * elem2);
 
 Tilemap *init_tilemap(void) {
     Tilemap *map = (Tilemap*)MemAlloc(sizeof(Tilemap));
@@ -49,6 +52,8 @@ Tilemap *init_tilemap(void) {
                     obj = obj->next;
                 }
 
+                qsort(map->obj_blocks, map->obj_blocks_size, sizeof(MapObjBlock), _comp_y_value);
+
             } else if (TextIsEqual("Collisions", current_layer->name.ptr)) {
                 int i=0;
                 for (
@@ -79,9 +84,7 @@ Tilemap *init_tilemap(void) {
                     i++;
                     if (TextIsEqual("Player", obj->name.ptr)) {
                         map->player_initial_pos = (Vector2) { .x=obj->x, .y=obj->y, };
-                        // printf("\n name: %s, %2.f, %2.f \n", obj->name.ptr, obj->x, obj->y);
                     }
-                    // printf("\n %i name: %s, %2.f, %2.f \n", i,obj->name.ptr, obj->x, obj->y);
                 }
                 for (int j=0; j<i; j++) {
                     cute_tiled_object_t *obj = current_layer->objects;
@@ -234,4 +237,14 @@ void _load_tiled_obj_sprites(Tilemap *map) {
     }
 
     return;
+}
+
+int _comp_y_value(const void * elem1, const void * elem2) {
+
+    float f = ((MapObjBlock*)elem1)->dest_rec.y + ((MapObjBlock*)elem1)->dest_rec.height/2.f;
+    float s = ((MapObjBlock*)elem2)->dest_rec.y + ((MapObjBlock*)elem2)->dest_rec.height/2.f;
+
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
 }
