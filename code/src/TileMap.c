@@ -201,7 +201,6 @@ void _load_tiled_tilemap(Tilemap *map) {
     map->cols = map->tileset_data->columns;
 
     init_sprite(&map->tileset, "resources/data/graphics/tilesets/world_tileset.png");
-    map->tileset.origin = (Vector2) {0};
     map->tileset.src_rec = (Rectangle) {
         .x = 0, .y = 0,
         .width = map->tileset_data->tilewidth, .height = map->tileset_data->tileheight,
@@ -233,7 +232,6 @@ void _load_tiled_obj_sprites(Tilemap *map) {
         map->obj_types[i].gid = i + GRASSROCK1;
         map->obj_types[i].type = map_obj_type_list[i];
         init_sprite(&map->obj_types[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map->obj_types[i].type));
-        map->obj_types[i].spr.origin = (Vector2) {0};
     }
 
     return;

@@ -16,38 +16,6 @@
 #define VERTICAL_COLLISION_MODE 'v'
 
 
-typedef enum PlayerAnimState {
-    STOPPED_PLAYER,
-    WALKING_PLAYER,
-
-    NUM_ANIM_STATES,
-} PlayerAnimState;
-
-typedef enum PlayerFacingDir {
-    DOWN_FACE_PLAYER,
-    UP_FACE_PLAYER,
-    RIGHT_FACE_PLAYER,
-    LEFT_FACE_PLAYER,
-
-    NUM_FACE_PLAYER,
-} PlayerFacingDir;
-
-typedef struct Player {
-    Sprite **spr;
-    Vector2 position;
-    Vector2 direction;
-    float speed;
-    Rectangle hitbox_rec;
-
-    PlayerFacingDir facing_direction;
-    PlayerAnimState anim_state;
-    float frame_timer;
-    float current_frame_time;
-    int current_frame;
-    Color tint;
-} Player;
-
-
 void _load_player_sprites(Player *player);
 
 void _start_animation(Player *player);
@@ -63,12 +31,12 @@ Player *init_player(Vector2 initial_pos) {
 
     _load_player_sprites(player);
 
-    player->direction = (Vector2) {};
+    player->direction = (Vector2) {0};
     player->speed = 400.f;
     player->position = initial_pos;
 
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-    current_sprite->dest_rec.x = initial_pos.x + (current_sprite->dest_rec.width);
+    current_sprite->dest_rec.x = initial_pos.x + (current_sprite->dest_rec.width/2.f);
     current_sprite->dest_rec.y = initial_pos.y + (current_sprite->dest_rec.height/2.f);
     Rectangle player_hitbox_rec = current_sprite->dest_rec;
     player_hitbox_rec.x -= player_hitbox_rec.width/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
@@ -261,6 +229,7 @@ void _load_player_sprites(Player *player) {
         for (int j=0; j<NUM_FRAMES; j++) {
             char *filepath = (char*) TextFormat("resources/images/player/%s/%i.png", facing_dir, j);
             init_sprite(&(player->spr[i][j]), filepath);
+            player->spr[i][j].origin = (Vector2) { .x = player->spr[i][j].src_rec.width/2.f, .y = player->spr[i][j].src_rec.height/2.f };
         }
     }
 
