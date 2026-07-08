@@ -48,6 +48,8 @@ typedef struct Player {
 } Player;
 
 
+void _load_player_sprites(Player *player);
+
 void _start_animation(Player *player);
 void _stop_animation(Player *player);
 
@@ -59,38 +61,7 @@ void _collision(Player *player, char collision_mode, Rectangle* collision_rec_li
 Player *init_player(Vector2 initial_pos) {
     Player *player = (Player*) MemAlloc(sizeof(Player));
 
-    // Loading all images for each player frame
-    player->spr = (Sprite**) MemAlloc(sizeof(Sprite*)*NUM_FACE_PLAYER);
-    for (int i=0; i<NUM_FACE_PLAYER; i++) {
-        char *facing_dir = "";
-        switch (i) {
-            case DOWN_FACE_PLAYER:
-                facing_dir = "down";
-                break;
-            case UP_FACE_PLAYER:
-                facing_dir = "up";
-                break;
-            case RIGHT_FACE_PLAYER:
-                facing_dir = "right";
-                break;
-            case LEFT_FACE_PLAYER:
-                facing_dir = "left";
-                break;
-        }
-        player->spr[i] = (Sprite*) MemAlloc(sizeof(Sprite)*NUM_FRAMES);
-        for (int j=0; j<NUM_FRAMES; j++) {
-            char *filepath = (char*) TextFormat("resources/images/player/%s/%i.png", facing_dir, j);
-            init_sprite(&(player->spr[i][j]), filepath);
-        }
-    }
-
-    // Initiating all other player values
-    player->facing_direction = DOWN_FACE_PLAYER;
-    player->anim_state = WALKING_PLAYER;
-    player->current_frame = 0;
-    player->current_frame_time = 0.1f;
-    player->frame_timer = 0;
-    player->tint = WHITE;
+    _load_player_sprites(player);
 
     player->direction = (Vector2) {};
     player->speed = 400.f;
@@ -102,7 +73,8 @@ Player *init_player(Vector2 initial_pos) {
     Rectangle player_hitbox_rec = current_sprite->dest_rec;
     player_hitbox_rec.x -= player_hitbox_rec.width/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
     player_hitbox_rec.width -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
-    player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
+    player_hitbox_rec.y += -player_hitbox_rec.height/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
+    player_hitbox_rec.height -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
     player->hitbox_rec = player_hitbox_rec;
 
     return player;
@@ -261,7 +233,44 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
     };
 
     current_sprite->dest_rec.x = player->position.x;
-    current_sprite->dest_rec.y = player->position.y;
+    current_sprite->dest_rec.y = player->position.y - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f;
+
+    return;
+}
+
+void _load_player_sprites(Player *player) {
+    // Loading all images for each player frame
+    player->spr = (Sprite**) MemAlloc(sizeof(Sprite*)*NUM_FACE_PLAYER);
+    for (int i=0; i<NUM_FACE_PLAYER; i++) {
+        char *facing_dir = "";
+        switch (i) {
+            case DOWN_FACE_PLAYER:
+                facing_dir = "down";
+                break;
+            case UP_FACE_PLAYER:
+                facing_dir = "up";
+                break;
+            case RIGHT_FACE_PLAYER:
+                facing_dir = "right";
+                break;
+            case LEFT_FACE_PLAYER:
+                facing_dir = "left";
+                break;
+        }
+        player->spr[i] = (Sprite*) MemAlloc(sizeof(Sprite)*NUM_FRAMES);
+        for (int j=0; j<NUM_FRAMES; j++) {
+            char *filepath = (char*) TextFormat("resources/images/player/%s/%i.png", facing_dir, j);
+            init_sprite(&(player->spr[i][j]), filepath);
+        }
+    }
+
+    // Initiating all other player values
+    player->facing_direction = DOWN_FACE_PLAYER;
+    player->anim_state = WALKING_PLAYER;
+    player->current_frame = 0;
+    player->current_frame_time = 0.1f;
+    player->frame_timer = 0;
+    player->tint = WHITE;
 
     return;
 }
