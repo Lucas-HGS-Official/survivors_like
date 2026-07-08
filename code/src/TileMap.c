@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <raylib.h>
-#include <stdio.h>
 #define CUTE_TILED_IMPLEMENTATION
 #include "cute_tiled.h"
 
@@ -12,49 +11,15 @@
 
 Rectangle *_alloc_map_collision_recs(Tilemap *map);
 void _free_map_collision_recs(Rectangle *collision_recs);
+void _load_tiled_tilemap(Tilemap *map);
+void _load_tiled_obj_sprites(Tilemap *map);
 
 Tilemap *init_tilemap(void) {
     Tilemap *map = (Tilemap*)MemAlloc(sizeof(Tilemap));
 
-    map->tilemap = cute_tiled_load_map_from_file("resources/data/maps/world.json", NULL);
-    assert(map->tilemap);
+    _load_tiled_tilemap(map);
 
-    map->layer = map->tilemap->layers;
-    map->tilemap_data = map->layer->data;
-    map->tileset_data = map->tilemap->tilesets;
-    map->cols = map->tileset_data->columns;
-
-    init_sprite(&map->tileset, "resources/data/graphics/tilesets/world_tileset.png");
-    map->tileset.origin = (Vector2) {0};
-    map->tileset.src_rec = (Rectangle) {
-        .x = 0, .y = 0,
-        .width = map->tileset_data->tilewidth, .height = map->tileset_data->tileheight,
-    };
-    map->tileset.dest_rec = map->tileset.src_rec;
-
-    char *map_obj_type_list[OBJECTS_GID_NUM] = {
-        "grassrock1",
-        "grassrock2",
-        "green_tree",
-        "green_tree_bushy",
-        "green_tree_small",
-        "ice_tree",
-        "ruin_pillar",
-        "ruin_pillar_broke",
-        "ruin_pillar_broke_alt",
-        "sandrock1",
-        "sandrock2",
-        "palm",
-        "palm_alt",
-        "palm_small",
-    };
-
-    for (int i=0; i<OBJECTS_GID_NUM; i++) {
-        map->obj_types[i].gid = i + GRASSROCK1;
-        map->obj_types[i].type = map_obj_type_list[i];
-        init_sprite(&map->obj_types[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map->obj_types[i].type));
-        map->obj_types[i].spr.origin = (Vector2) {0};
-    }
+    _load_tiled_obj_sprites(map);
 
     map->collission_rec_list_size = 0;
 
@@ -204,7 +169,10 @@ Rectangle *_alloc_map_collision_recs(Tilemap *map) {
     Rectangle *collision_recs = MemAlloc(sizeof(Rectangle) * (map->obj_blocks_size + map->invisible_recs_size));
 
     for (int i=0; i<map->obj_blocks_size; i++) {
-        collision_recs[i] = map->obj_blocks[i].dest_rec;
+        Rectangle collision_rec = map->obj_blocks[i].dest_rec;
+        collision_rec.height /= 2;
+        collision_rec.y +=collision_rec.height;
+        collision_recs[i] = collision_rec;
     }
     for (int i=0; i<map->invisible_recs_size; i++) {
         collision_recs[map->obj_blocks_size+i] = map->invisible_recs[i];
@@ -215,6 +183,55 @@ Rectangle *_alloc_map_collision_recs(Tilemap *map) {
 
 void _free_map_collision_recs(Rectangle *collision_recs) {
     MemFree(collision_recs);
+
+    return;
+}
+
+void _load_tiled_tilemap(Tilemap *map) {
+
+    map->tilemap = cute_tiled_load_map_from_file("resources/data/maps/world.json", NULL);
+    assert(map->tilemap);
+
+    map->layer = map->tilemap->layers;
+    map->tilemap_data = map->layer->data;
+    map->tileset_data = map->tilemap->tilesets;
+    map->cols = map->tileset_data->columns;
+
+    init_sprite(&map->tileset, "resources/data/graphics/tilesets/world_tileset.png");
+    map->tileset.origin = (Vector2) {0};
+    map->tileset.src_rec = (Rectangle) {
+        .x = 0, .y = 0,
+        .width = map->tileset_data->tilewidth, .height = map->tileset_data->tileheight,
+    };
+    map->tileset.dest_rec = map->tileset.src_rec;
+
+    return;
+}
+
+void _load_tiled_obj_sprites(Tilemap *map) {
+    char *map_obj_type_list[OBJECTS_GID_NUM] = {
+        "grassrock1",
+        "grassrock2",
+        "green_tree",
+        "green_tree_bushy",
+        "green_tree_small",
+        "ice_tree",
+        "ruin_pillar",
+        "ruin_pillar_broke",
+        "ruin_pillar_broke_alt",
+        "sandrock1",
+        "sandrock2",
+        "palm",
+        "palm_alt",
+        "palm_small",
+    };
+
+    for (int i=0; i<OBJECTS_GID_NUM; i++) {
+        map->obj_types[i].gid = i + GRASSROCK1;
+        map->obj_types[i].type = map_obj_type_list[i];
+        init_sprite(&map->obj_types[i].spr, (char*)TextFormat("resources/data/graphics/objects/%s.png", map->obj_types[i].type));
+        map->obj_types[i].spr.origin = (Vector2) {0};
+    }
 
     return;
 }
