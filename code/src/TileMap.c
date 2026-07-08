@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <raylib.h>
+#include <stdio.h>
 #define CUTE_TILED_IMPLEMENTATION
 #include "cute_tiled.h"
 
@@ -101,6 +102,25 @@ Tilemap *init_tilemap(void) {
                         .x=obj->x, .y = obj->y,
                         .width=obj->width, .height=obj->height,
                     };
+                    obj = obj->next;
+                }
+            } else if (TextIsEqual("Entities", current_layer->name.ptr)) {
+                int i=0;
+                for (
+                        cute_tiled_object_t *obj = current_layer->objects;
+                        obj;
+                        obj = obj->next
+                    ) {
+                    i++;
+                    if (TextIsEqual("Player", obj->name.ptr)) {
+                        map->player_initial_pos = (Vector2) { .x=obj->x, .y=obj->y, };
+                        // printf("\n name: %s, %2.f, %2.f \n", obj->name.ptr, obj->x, obj->y);
+                    }
+                    // printf("\n %i name: %s, %2.f, %2.f \n", i,obj->name.ptr, obj->x, obj->y);
+                }
+                for (int j=0; j<i; j++) {
+                    cute_tiled_object_t *obj = current_layer->objects;
+
                     obj = obj->next;
                 }
             }

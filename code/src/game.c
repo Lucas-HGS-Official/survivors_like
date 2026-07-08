@@ -33,7 +33,7 @@ void game_init(void) {
     map = init_tilemap();
     recs_list = map->collision_rec_list;
 
-    player = init_player();
+    player = init_player(map->player_initial_pos);
     camera = init_player_camera(player);
 
     return;

@@ -56,7 +56,7 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt);
 void _collision(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs);
 
 
-Player *init_player(void) {
+Player *init_player(Vector2 initial_pos) {
     Player *player = (Player*) MemAlloc(sizeof(Player));
 
     // Loading all images for each player frame
@@ -94,12 +94,11 @@ Player *init_player(void) {
 
     player->direction = (Vector2) {};
     player->speed = 400.f;
-    player->position = (Vector2) {
-        .x = WINDOW_WIDTH/2.f,
-        .y = WINDOW_HEIGHT/2.f,
-    };
+    player->position = initial_pos;
 
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
+    current_sprite->dest_rec.x = initial_pos.x + (current_sprite->dest_rec.width);
+    current_sprite->dest_rec.y = initial_pos.y + (current_sprite->dest_rec.height/2.f);
     Rectangle player_hitbox_rec = current_sprite->dest_rec;
     player_hitbox_rec.x -= player_hitbox_rec.width/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
     player_hitbox_rec.width -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;

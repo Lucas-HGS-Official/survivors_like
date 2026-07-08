@@ -57,6 +57,8 @@ typedef struct Tilemap {
 
     CollisionRecs *collision_rec_list;
     int collission_rec_list_size;
+
+    Vector2 player_initial_pos;
 } Tilemap;
 
 
