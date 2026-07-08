@@ -1,9 +1,12 @@
 #include "Sprite.h"
 
 #include <raylib.h>
+#include <stdlib.h>
 
 #include "settings.h"
 
+
+static int _comp_y_value(const void * elem1, const void * elem2);
 
 void init_sprite(Sprite *sprite, char *texture_file_path) {
     // Initiating all necessary values to draw the a Texture2D
@@ -28,9 +31,29 @@ void draw_sprite(Sprite *sprite, Color sprite_tint) {
 
     return;
 }
+void sort_and_draw_sprite_list(Sprite *sprite_list, int sprite_list_size) {
+
+    qsort(sprite_list, sprite_list_size, sizeof(Sprite), _comp_y_value);
+
+    for (int i=0; i<sprite_list_size; i++) {
+        draw_sprite(&sprite_list[i], WHITE);
+    }
+
+    return;
+}
 void destroy_sprite(Sprite *sprite) {
     UnloadTexture(*sprite->texture);
     MemFree(sprite->texture);
 
     return;
+}
+
+int _comp_y_value(const void * elem1, const void * elem2) {
+
+    float f = ((Sprite*)elem1)->dest_rec.y + ((Sprite*)elem1)->dest_rec.height/2.f;
+    float s = ((Sprite*)elem2)->dest_rec.y + ((Sprite*)elem2)->dest_rec.height/2.f;
+
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
 }
