@@ -43,7 +43,7 @@ Tilemap *init_tilemap(void) {
                 map->obj_blocks_size = i;
                 map->collission_rec_list_size += i;
                 cute_tiled_object_t *obj = current_layer->objects;
-                for (i--; i>=0; i--) {
+                for (int i=0; i<map->obj_blocks_size; i++) {
                     map->obj_blocks[i].gid = obj->gid;
                     map->obj_blocks[i].dest_rec = (Rectangle) {
                         .x = obj->x, .y = obj->y - obj->height,
@@ -53,6 +53,15 @@ Tilemap *init_tilemap(void) {
                 }
 
                 qsort(map->obj_blocks, map->obj_blocks_size, sizeof(MapObjBlock), _comp_y_value);
+
+                for (int i=0; i<map->obj_blocks_size; i++) {
+                    for (int j=0; j<OBJECTS_GID_NUM; j++) {
+                        if (map->obj_types[j].gid == map->obj_blocks[i].gid) {
+                            map->obj_types[j].spr.dest_rec = map->obj_blocks[i].dest_rec;
+                            map->obj_blocks[i].spr = map->obj_types[j].spr;
+                        }
+                    }
+                }
 
             } else if (TextIsEqual("Collisions", current_layer->name.ptr)) {
                 int i=0;
@@ -132,22 +141,6 @@ void draw_tilemap(Tilemap *map) {
                 map->tileset.dest_rec.y = map->tileset.dest_rec.height * map_current_row;
 
                 draw_sprite(&map->tileset, WHITE);
-            }
-        } else if (TextIsEqual("objectgroup", current_layer->type.ptr)) {
-            // current_layer->name.ptr
-            // Entities
-            // Collisions
-            // Objects
-            if (TextIsEqual("Objects", current_layer->name.ptr)) {
-                for (int i=0; i<map->obj_blocks_size; i++) {
-                    for (int j=0; j<OBJECTS_GID_NUM; j++) {
-                        if (map->obj_types[j].gid == map->obj_blocks[i].gid) {
-                            map->obj_types[j].spr.dest_rec = map->obj_blocks[i].dest_rec;
-
-                            draw_sprite(&map->obj_types[j].spr, WHITE);
-                        }
-                    }
-                }
             }
         }
         current_layer = current_layer->next;

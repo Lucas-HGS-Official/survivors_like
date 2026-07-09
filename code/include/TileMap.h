@@ -34,6 +34,7 @@ typedef struct MapObj {
 } MapObj;
 
 typedef struct MapObjBlock {
+    Sprite spr;
     Rectangle dest_rec;
     ObjectsGID gid;
 } MapObjBlock;
