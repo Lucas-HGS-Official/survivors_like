@@ -94,7 +94,6 @@ void _draw_game(void) {
 
     draw_tilemap(map);
     sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size+1);
-    // draw_player(player);
 
     EndMode2D();
     EndDrawing();

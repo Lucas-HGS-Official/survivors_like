@@ -90,8 +90,8 @@ void update_player_camera(Camera2D *camera, Player *player) {
     return;
 }
 void draw_player(Player *player) {
-    Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-    draw_sprite(current_sprite, player->tint);
+    // Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
+    // draw_sprite(current_sprite, player->tint);
     // DrawRectangleLinesEx(current_sprite->dest_rec, 2.f, RED);
     // DrawRectangleLinesEx(player->hitbox_rec, 3.f, BLUE);
 

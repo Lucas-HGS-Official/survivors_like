@@ -767,6 +767,18 @@
                  "y":616
                 }, 
                 {
+                 "height":100,
+                 "id":92,
+                 "name":"",
+                 "opacity":1,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":1050.67,
+                 "x":1654.67,
+                 "y":540
+                }, 
+                {
                  "height":64,
                  "id":93,
                  "name":"",

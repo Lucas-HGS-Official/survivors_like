@@ -37,6 +37,7 @@ void sort_and_draw_sprite_list(Sprite *sprite_list, int sprite_list_size) {
 
     for (int i=0; i<sprite_list_size; i++) {
         draw_sprite(&sprite_list[i], WHITE);
+        // DrawRectangleLinesEx(sprite_list[i].dest_rec, 2.f, RED);
     }
 
     return;
