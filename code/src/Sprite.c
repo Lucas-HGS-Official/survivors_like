@@ -28,7 +28,6 @@ void init_sprite(Sprite *sprite, char *texture_file_path) {
 }
 void draw_sprite(Sprite *sprite, Color sprite_tint) {
     DrawTexturePro(*sprite->texture, sprite->src_rec, sprite->dest_rec, sprite->origin, sprite->rotation, sprite_tint);
-    // DrawRectangleLinesEx(sprite->dest_rec, 2.f, RED);
 
     return;
 }

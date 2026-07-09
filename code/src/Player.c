@@ -36,20 +36,21 @@ Player *init_player(Vector2 initial_pos) {
     player->position = initial_pos;
 
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-    current_sprite->dest_rec.x = initial_pos.x + (current_sprite->dest_rec.width/2.f);
-    current_sprite->dest_rec.y = initial_pos.y + (current_sprite->dest_rec.height/2.f);
+    current_sprite->dest_rec.x = initial_pos.x;
+    current_sprite->dest_rec.y = initial_pos.y;
     Rectangle player_hitbox_rec = current_sprite->dest_rec;
-    player_hitbox_rec.x -= player_hitbox_rec.width/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
+    player_hitbox_rec.x += HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f;
+    player_hitbox_rec.y += current_sprite->dest_rec.height/2.f;
     player_hitbox_rec.width -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
-    player_hitbox_rec.y += -player_hitbox_rec.height/2.f + HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
-    player_hitbox_rec.height -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
+    player_hitbox_rec.height -= current_sprite->dest_rec.height/2.f;
     player->hitbox_rec = player_hitbox_rec;
 
     return player;
 }
 Camera2D *init_player_camera(Player *player) {
     Camera2D *camera = (Camera2D*)MemAlloc(sizeof(Camera2D));
-    camera->target = player->position;
+    camera->target.x = player->position.x + player->spr[0]->dest_rec.width/2.f;
+    camera->target.y = player->position.y + player->spr[0]->dest_rec.height/2.f;
     camera->offset = (Vector2){ .x=WINDOW_WIDTH/2.0f, .y=WINDOW_HEIGHT/2.0f };
     camera->rotation = 0.0f;
     camera->zoom = 1.0f;
@@ -83,13 +84,16 @@ void update_player(Player *player, CollisionRecs *collision_recs_list,float dt) 
     return;
 }
 void update_player_camera(Camera2D *camera, Player *player) {
-    camera->target = player->position;
+    camera->target.x = player->position.x + player->spr[0]->dest_rec.width/2.f;
+    camera->target.y = player->position.y + player->spr[0]->dest_rec.height/2.f;
 
     return;
 }
 void draw_player(Player *player) {
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
     draw_sprite(current_sprite, player->tint);
+    // DrawRectangleLinesEx(current_sprite->dest_rec, 2.f, RED);
+    // DrawRectangleLinesEx(player->hitbox_rec, 3.f, BLUE);
 
     return;
 }
@@ -111,8 +115,6 @@ void _collision(Player *player, char collision_mode, Rectangle *hitbox_rec_list,
         return;
     }
     Rectangle player_hitbox_rec = player->hitbox_rec;
-    player_hitbox_rec.x -= player_hitbox_rec.width/2.f;
-    player_hitbox_rec.y -= player_hitbox_rec.height/2.f;
     for (int i=0; i<num_recs; i++) {
         if (CheckCollisionRecs(player_hitbox_rec, hitbox_rec_list[i])) {
 
@@ -124,17 +126,17 @@ void _collision(Player *player, char collision_mode, Rectangle *hitbox_rec_list,
 
             if (collision_mode == 'h') {
                 if (player->direction.x > 0) {
-                    player->hitbox_rec.x = collided_left_left - player_hitbox_rec.width/2.f;
+                    player->hitbox_rec.x = collided_left_left - player_hitbox_rec.width;
                 }
                 if (player->direction.x < 0) {
-                    player->hitbox_rec.x = collided_right_side + player_hitbox_rec.width/2.f;
+                    player->hitbox_rec.x = collided_right_side;
                 }
             } else {
                 if (player->direction.y > 0) {
-                    player->hitbox_rec.y = collided_top_side - player_hitbox_rec.height/2.f;
+                    player->hitbox_rec.y = collided_top_side - player_hitbox_rec.height;
                 }
                 if (player->direction.y < 0) {
-                    player->hitbox_rec.y = collided_bottom_side + player_hitbox_rec.height/2.f;
+                    player->hitbox_rec.y = collided_bottom_side;
                 }
             }
         }
@@ -188,20 +190,13 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
     _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
 
-    Vector2 half_size = {
-        .x = player->hitbox_rec.width/2.f,
-        .y = player->hitbox_rec.height/2.f,
-    };
-    // player->hitbox_rec.x = Clamp(player->hitbox_rec.x, half_size.x, WINDOW_WIDTH - half_size.x);
-    // player->hitbox_rec.y = Clamp(player->hitbox_rec.y, half_size.y, WINDOW_HEIGHT - half_size.y);
-
     player->position = (Vector2) {
-        .x = player->hitbox_rec.x,
-        .y = player->hitbox_rec.y,
+        .x = player->hitbox_rec.x - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f,
+        .y = player->hitbox_rec.y - current_sprite->dest_rec.height/2.f,
     };
 
     current_sprite->dest_rec.x = player->position.x;
-    current_sprite->dest_rec.y = player->position.y - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f;
+    current_sprite->dest_rec.y = player->position.y;
 
     return;
 }
@@ -229,7 +224,6 @@ void _load_player_sprites(Player *player) {
         for (int j=0; j<NUM_FRAMES; j++) {
             char *filepath = (char*) TextFormat("resources/images/player/%s/%i.png", facing_dir, j);
             init_sprite(&(player->spr[i][j]), filepath);
-            player->spr[i][j].origin = (Vector2) { .x = player->spr[i][j].src_rec.width/2.f, .y = player->spr[i][j].src_rec.height/2.f };
         }
     }
 
