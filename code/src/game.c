@@ -1,15 +1,17 @@
 #include "game.h"
 
+#include <raylib.h>
+#include <raymath.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <raylib.h>
 
-#include "Sprite.h"
 #include "settings.h"
 
+#include "Sprite.h"
 #include "Player.h"
 #include "CollisionBoxes.h"
 #include "TileMap.h"
+#include "Gun.h"
 
 
 void game_init(void);
@@ -21,6 +23,7 @@ void _draw_game(void);
 
 static Tilemap *map;
 static Player *player = NULL;
+static Gun *gun = NULL;
 static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
 static Camera2D *camera = NULL;
@@ -37,6 +40,7 @@ void game_init(void) {
 
     player = init_player(map->player_initial_pos);
     camera = init_player_camera(player);
+    gun = init_gun(player);
 
     // Sprite foreground_sprites[map->obj_blocks_size+1];
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size+1));
@@ -83,6 +87,8 @@ void _update_game(float dt) {
     Sprite *current_player_sprite = &player->spr[player->facing_direction][player->current_frame];
     foreground_sprites[map->obj_blocks_size] = *current_player_sprite;
 
+    update_gun(gun, player);
+
     if (WindowShouldClose()) { is_game_running = false; }
 
     return;
@@ -94,6 +100,7 @@ void _draw_game(void) {
 
     draw_tilemap(map);
     sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size+1);
+    draw_gun(gun);
 
     EndMode2D();
     EndDrawing();
