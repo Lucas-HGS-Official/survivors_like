@@ -102,7 +102,7 @@ void _update_game(float dt) {
         for (int i=0; i<BULLET_LIST_SIZE; i++) {
             if(!bullet_list[i].is_visible && fire_timer <= 0) {
                 bullet_list[i] = instance_bullet(bullet, gun->tip, gun->direction);
-                fire_timer = .5f;
+                fire_timer = .35f;
                 break;
             }
         }
