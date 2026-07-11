@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "Bullet.h"
 #include "settings.h"
 
 #include "Sprite.h"
@@ -21,13 +22,18 @@ void game_close(void);
 void _update_game(float dt);
 void _draw_game(void);
 
-static Tilemap *map;
+
+static Tilemap *map = NULL;
 static Player *player = NULL;
+static float fire_timer = 0;
 static Gun *gun = NULL;
+static Bullet *bullet = NULL;
+static Bullet bullet_list[BULLET_LIST_SIZE] = {0};
 static CollisionRecs *recs_list = NULL;
 static bool is_game_running = true;
 static Camera2D *camera = NULL;
-static Sprite *foreground_sprites;
+static Sprite *foreground_sprites = NULL;
+
 
 void game_init(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_NAME);
@@ -41,8 +47,9 @@ void game_init(void) {
     player = init_player(map->player_initial_pos);
     camera = init_player_camera(player);
     gun = init_gun(player);
+    bullet = init_bullet();
+    bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
 
-    // Sprite foreground_sprites[map->obj_blocks_size+1];
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size+1));
     for (int i=0; i<map->obj_blocks_size; i++) {
         foreground_sprites[i] = map->obj_blocks[i].spr;
@@ -65,6 +72,7 @@ void game_close(void) {
     MemFree(camera);
     MemFree(foreground_sprites);
 
+    destroy_bullet(bullet);
     destroy_collision_recs_list(recs_list);
     destroy_player(player);
 
@@ -77,8 +85,11 @@ void game_close(void) {
 }
 
 void _update_game(float dt) {
+    if (WindowShouldClose()) { is_game_running = false; }
+
     update_player(player, recs_list, dt);
     update_player_camera(camera, player);
+    update_gun(gun, player);
 
     for (int i=0; i<map->obj_blocks_size; i++) {
         foreground_sprites[i] = map->obj_blocks[i].spr;
@@ -87,9 +98,17 @@ void _update_game(float dt) {
     Sprite *current_player_sprite = &player->spr[player->facing_direction][player->current_frame];
     foreground_sprites[map->obj_blocks_size] = *current_player_sprite;
 
-    update_gun(gun, player);
-
-    if (WindowShouldClose()) { is_game_running = false; }
+    if (IsKeyPressed(KEY_SPACE)) {
+        for (int i=0; i<BULLET_LIST_SIZE; i++) {
+            if(!bullet_list[i].is_visible && fire_timer <= 0) {
+                bullet_list[i] = instance_bullet(bullet, gun->tip, gun->direction);
+                fire_timer = .5f;
+                break;
+            }
+        }
+    }
+    fire_timer -= dt;
+    update_bullet_list(bullet_list, BULLET_LIST_SIZE, dt);
 
     return;
 }
@@ -100,6 +119,7 @@ void _draw_game(void) {
 
     draw_tilemap(map);
     sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size+1);
+    draw_bullet_list(bullet_list, BULLET_LIST_SIZE);
     draw_gun(gun);
 
     EndMode2D();

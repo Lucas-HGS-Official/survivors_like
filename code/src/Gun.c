@@ -8,7 +8,6 @@
 #include "settings.h"
 
 
-
 Gun *init_gun(Player *player) {
     Gun *gun = (Gun*)MemAlloc(sizeof(Gun));
 
@@ -31,6 +30,11 @@ Gun *init_gun(Player *player) {
     gun->src_rec_flip = gun->src_rec;
     gun->src_rec_flip.height *= -1;
 
+    gun->tip = (Vector2) {
+        .x=player_center.x + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.width/2.f).x,
+        .y=player_center.y + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.height/2.f).y,
+    };
+
     return gun;
 }
 void update_gun(Gun *gun, Player *player) {
@@ -51,21 +55,15 @@ void update_gun(Gun *gun, Player *player) {
         gun->spr.src_rec = gun->src_rec;
     }
 
+    gun->tip = (Vector2) {
+        .x=player_center.x + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.width/2.f).x,
+        .y=player_center.y + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.height/2.f).y,
+    };
+
     return;
 }
 void draw_gun(Gun *gun) {
     draw_sprite(&gun->spr, WHITE);
-
-    // Sprite *current_player_sprite = &player->spr[player->facing_direction][player->current_frame];
-    // Vector2 player_center = {
-    //     .x = current_player_sprite->dest_rec.x + current_player_sprite->dest_rec.width/2.f,
-    //     .y = current_player_sprite->dest_rec.y + current_player_sprite->dest_rec.height/2.f,
-    // };
-    // Vector2 gun_tip = {
-    //     .x=player_center.x + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.width/2.f).x,
-    //     .y=player_center.y + Vector2Scale(gun->direction, gun->distance + gun->spr.dest_rec.height/2.f).y,
-    // };
-    // DrawLineEx(player_center, gun_tip, 2.f, BLUE);
 
     return;
 }

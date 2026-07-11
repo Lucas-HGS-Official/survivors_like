@@ -9,9 +9,10 @@
 typedef struct Gun {
     Sprite spr;
     float distance;
-    Vector2 direction;
     Rectangle src_rec;
     Rectangle src_rec_flip;
+    Vector2 direction;
+    Vector2 tip;
 } Gun;
 
 
