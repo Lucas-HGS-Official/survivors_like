@@ -98,7 +98,7 @@ void _update_game(float dt) {
     Sprite *current_player_sprite = &player->spr[player->facing_direction][player->current_frame];
     foreground_sprites[map->obj_blocks_size] = *current_player_sprite;
 
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyDown(KEY_SPACE) || IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         for (int i=0; i<BULLET_LIST_SIZE; i++) {
             if(!bullet_list[i].is_visible && fire_timer <= 0) {
                 bullet_list[i] = instance_bullet(bullet, gun->tip, gun->direction);

@@ -157,14 +157,19 @@ void _stop_animation(Player *player) {
 }
 
 void _controls(Player *player) {
+    float up_move = (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W));
+    float down_move = (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S));
+    float right_move = (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D));
+    float left_move = (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A));
     player->direction = (Vector2){
-        .x = (float)IsKeyDown(KEY_RIGHT) - (float)IsKeyDown(KEY_LEFT),
-        .y = (float)IsKeyDown(KEY_DOWN) - (float)IsKeyDown(KEY_UP)
+        .x = right_move - left_move,
+        .y = down_move - up_move,
     };
     player->direction = Vector2Normalize(player->direction);
 
-    if (!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) { player->direction.y = 0; }
-    if (!IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) { player->direction.x = 0; }
+
+    if (!down_move && !up_move) { player->direction.y = 0; }
+    if (!right_move && !left_move) { player->direction.x = 0; }
 
     player->direction = Vector2Normalize(player->direction);
 
