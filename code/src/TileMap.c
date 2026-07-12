@@ -90,20 +90,25 @@ Tilemap *init_tilemap(void) {
                         obj;
                         obj = obj->next
                 ) {
-                    i++;
+                    if (TextIsEqual("Enemy", obj->name.ptr)) {
+                        i++;
+                    }
                     if (TextIsEqual("Player", obj->name.ptr)) {
                         map->player_initial_pos = (Vector2) { .x=obj->x, .y=obj->y, };
                     }
                 }
+                map->num_enemy_spawn_points = i;
                 map->enemy_spawn_points = (Vector2*)MemAlloc(sizeof(Vector2) * (i));
-                for (int j=0; j<i; j++) {
-                    cute_tiled_object_t *obj = current_layer->objects;
-
+                int j=0;
+                for (
+                        cute_tiled_object_t *obj = current_layer->objects;
+                        obj;
+                        obj = obj->next
+                ) {
                     if (TextIsEqual("Enemy", obj->name.ptr)) {
                         map->enemy_spawn_points[j] = (Vector2) { .x=obj->x, .y=obj->y };
+                        j++;
                     }
-
-                    obj = obj->next;
                 }
             }
         }

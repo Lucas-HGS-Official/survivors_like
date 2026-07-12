@@ -60,6 +60,7 @@ typedef struct Tilemap {
     int collission_rec_list_size;
 
     Vector2 *enemy_spawn_points;
+    int num_enemy_spawn_points;
     Vector2 player_initial_pos;
 } Tilemap;
 
