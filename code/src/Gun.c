@@ -22,8 +22,8 @@ Gun *init_gun(Player *player) {
 
 
     init_sprite(&gun->spr, "resources/images/gun/gun.png");
-    gun->spr.dest_rec.x = player_center.x + Vector2Scale(gun->direction, gun->distance/2.f).x;
-    gun->spr.dest_rec.y = player_center.y + Vector2Scale(gun->direction, gun->distance/2.f).y;
+    gun->spr.dest_rec.x = player_center.x + Vector2Scale(gun->direction, gun->distance).x;
+    gun->spr.dest_rec.y = player_center.y + Vector2Scale(gun->direction, gun->distance).y;
     gun->spr.origin = (Vector2) { .x=gun->spr.dest_rec.width/2.f, .y=gun->spr.dest_rec.height/2.f };
 
     gun->src_rec = gun->spr.src_rec;

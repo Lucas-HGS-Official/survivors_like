@@ -6,4 +6,5 @@
 #define WINDOW_HEIGHT 720
 #define GAME_NAME "Survivor Like"
 
-#define TILE_SIZE 64
+// All animations have 4 frames
+#define NUM_FRAMES 4

@@ -8,8 +8,6 @@
 #include "Sprite.h"
 
 
-// All player animations have for 4 frames
-#define NUM_FRAMES 4
 #define HORIZONTAL_WHITE_SPACE_PLAYER_SPR 120
 
 #define HORIZONTAL_COLLISION_MODE 'h'
