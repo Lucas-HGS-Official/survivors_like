@@ -3,9 +3,9 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-#include "Bullet.h"
 #include "settings.h"
 
 #include "Sprite.h"
@@ -13,26 +13,31 @@
 #include "CollisionBoxes.h"
 #include "TileMap.h"
 #include "Gun.h"
+#include "Bullet.h"
+#include "Enemy.h"
 
-
-void game_init(void);
-void game_loop(void);
-void game_close(void);
 
 void _update_game(float dt);
 void _draw_game(void);
 
 
+static bool is_game_running = true;
+static CollisionRecs *recs_list = NULL;
+static Sprite *foreground_sprites = NULL;
+
 static Tilemap *map = NULL;
+
 static Player *player = NULL;
+static Camera2D *camera = NULL;
+
 static float fire_timer = 0;
 static Gun *gun = NULL;
 static Bullet *bullet = NULL;
-static Bullet bullet_list[BULLET_LIST_SIZE] = {0};
-static CollisionRecs *recs_list = NULL;
-static bool is_game_running = true;
-static Camera2D *camera = NULL;
-static Sprite *foreground_sprites = NULL;
+static Bullet bullet_list[MAX_NUM_BULLETS] = {0};
+
+static float spawn_enemy_timer = 0;
+static Enemy *enemy_types = NULL;
+static Enemy enemy_list[MAX_NUM_ENEMIES] = {0};
 
 
 void game_init(void) {
@@ -40,6 +45,7 @@ void game_init(void) {
     InitAudioDevice();
     SetTargetFPS(60);
     is_game_running = true;
+    SetRandomSeed(0);
 
     map = init_tilemap();
     recs_list = map->collision_rec_list;
@@ -49,6 +55,7 @@ void game_init(void) {
     gun = init_gun(player);
     bullet = init_bullet();
     bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
+    enemy_types = init_enemy_types();
 
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size+1));
     for (int i=0; i<map->obj_blocks_size; i++) {
@@ -72,6 +79,7 @@ void game_close(void) {
     MemFree(camera);
     MemFree(foreground_sprites);
 
+    destroy_enemy_types(enemy_types);
     destroy_bullet(bullet);
     destroy_collision_recs_list(recs_list);
     destroy_player(player);
@@ -99,7 +107,7 @@ void _update_game(float dt) {
     foreground_sprites[map->obj_blocks_size] = *current_player_sprite;
 
     if (IsKeyDown(KEY_SPACE) || IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        for (int i=0; i<BULLET_LIST_SIZE; i++) {
+        for (int i=0; i<MAX_NUM_BULLETS; i++) {
             if(!bullet_list[i].is_visible && fire_timer <= 0) {
                 bullet_list[i] = instance_bullet(bullet, gun->tip, gun->direction);
                 fire_timer = .35f;
@@ -108,7 +116,22 @@ void _update_game(float dt) {
         }
     }
     fire_timer -= dt;
-    update_bullet_list(bullet_list, BULLET_LIST_SIZE, dt);
+    update_bullet_list(bullet_list, MAX_NUM_BULLETS, dt);
+
+    if (spawn_enemy_timer <= 0) {
+        spawn_enemy_timer = 3.f;
+        for (int i=0; i<MAX_NUM_ENEMIES; i++) {
+            if (!enemy_list[i].is_visible) {
+                int rand_enemy = GetRandomValue(0, NUM_ENEMY_TYPES-1);
+                int rand_spwn_pnt = GetRandomValue(0, map->num_enemy_spawn_points - 1);
+                enemy_list[i] = instance_enemy(&enemy_types[rand_enemy], map->enemy_spawn_points[rand_spwn_pnt]);
+                printf("\n enemy: %i, at (.x=%.2f, .y=%.2f) \n", i, map->enemy_spawn_points[rand_spwn_pnt].x, map->enemy_spawn_points[rand_spwn_pnt].y);
+                break;
+            }
+        }
+    }
+    spawn_enemy_timer -= dt;
+    update_enemy_list(enemy_list, MAX_NUM_ENEMIES, player->position, dt);
 
     return;
 }
@@ -119,7 +142,8 @@ void _draw_game(void) {
 
     draw_tilemap(map);
     sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size+1);
-    draw_bullet_list(bullet_list, BULLET_LIST_SIZE);
+    draw_bullet_list(bullet_list, MAX_NUM_BULLETS);
+    draw_enemy_list(enemy_list, MAX_NUM_ENEMIES);
     draw_gun(gun);
 
     EndMode2D();
