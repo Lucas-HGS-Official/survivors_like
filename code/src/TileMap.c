@@ -35,7 +35,7 @@ Tilemap *init_tilemap(void) {
                         cute_tiled_object_t *obj = current_layer->objects;
                         obj;
                         obj = obj->next
-                    ) {
+                ) {
                     i++;
                 }
 
@@ -89,14 +89,19 @@ Tilemap *init_tilemap(void) {
                         cute_tiled_object_t *obj = current_layer->objects;
                         obj;
                         obj = obj->next
-                    ) {
+                ) {
                     i++;
                     if (TextIsEqual("Player", obj->name.ptr)) {
                         map->player_initial_pos = (Vector2) { .x=obj->x, .y=obj->y, };
                     }
                 }
+                map->enemy_spawn_points = (Vector2*)MemAlloc(sizeof(Vector2) * (i));
                 for (int j=0; j<i; j++) {
                     cute_tiled_object_t *obj = current_layer->objects;
+
+                    if (TextIsEqual("Enemy", obj->name.ptr)) {
+                        map->enemy_spawn_points[j] = (Vector2) { .x=obj->x, .y=obj->y };
+                    }
 
                     obj = obj->next;
                 }
@@ -153,6 +158,7 @@ void destroy_tilemap(Tilemap *map) {
     for (int i=0; i<OBJECTS_GID_NUM; i++) {
         destroy_sprite(&map->obj_types[i].spr);
     }
+    MemFree(map->enemy_spawn_points);
     MemFree(map->obj_blocks);
     destroy_sprite(&map->tileset);
     cute_tiled_free_map(map->tilemap);
