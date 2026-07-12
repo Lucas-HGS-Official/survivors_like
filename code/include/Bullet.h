@@ -6,7 +6,7 @@
 #include "Sprite.h"
 
 
-#define BULLET_LIST_SIZE 100
+#define MAX_NUM_BULLETS 100
 
 
 typedef struct Bullet {
