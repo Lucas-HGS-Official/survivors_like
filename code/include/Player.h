@@ -4,6 +4,7 @@
 
 #include "Sprite.h"
 #include "CollisionBoxes.h"
+#include "settings.h"
 
 
 typedef enum PlayerAnimState {
@@ -23,7 +24,7 @@ typedef enum PlayerFacingDir {
 } PlayerFacingDir;
 
 typedef struct Player {
-    Sprite **spr;
+    Sprite spr[NUM_FACE_PLAYER][NUM_FRAMES];
     Vector2 position;
     Vector2 direction;
     float speed;

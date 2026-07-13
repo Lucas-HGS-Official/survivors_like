@@ -88,8 +88,8 @@ void update_player_camera(Camera2D *camera, Player *player) {
     return;
 }
 void draw_player(Player *player) {
-    // Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
-    // draw_sprite(current_sprite, player->tint);
+    Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
+    draw_sprite(current_sprite, player->tint);
     // DrawRectangleLinesEx(current_sprite->dest_rec, 2.f, RED);
     // DrawRectangleLinesEx(player->hitbox_rec, 3.f, BLUE);
 
@@ -102,7 +102,6 @@ void destroy_player(Player* player) {
             destroy_sprite(&player->spr[i][j]);
         }
     }
-    MemFree(player->spr);
     MemFree(player);
 
     return;
@@ -206,7 +205,6 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
 
 void _load_player_sprites(Player *player) {
     // Loading all images for each player frame
-    player->spr = (Sprite**) MemAlloc(sizeof(Sprite*)*NUM_FACE_PLAYER);
     for (int i=0; i<NUM_FACE_PLAYER; i++) {
         char *facing_dir = "";
         switch (i) {
@@ -223,7 +221,6 @@ void _load_player_sprites(Player *player) {
                 facing_dir = "left";
                 break;
         }
-        player->spr[i] = (Sprite*) MemAlloc(sizeof(Sprite)*NUM_FRAMES);
         for (int j=0; j<NUM_FRAMES; j++) {
             char *filepath = (char*) TextFormat("resources/images/player/%s/%i.png", facing_dir, j);
             init_sprite(&(player->spr[i][j]), filepath);
