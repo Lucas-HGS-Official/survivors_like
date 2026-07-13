@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sprite.h"
+#include "settings.h"
 #include <raylib.h>
 
 
@@ -17,7 +18,7 @@ typedef enum ENEMY_TYPES {
 
 typedef struct Enemy {
     bool is_visible;
-    Sprite *spr_anim;
+    Sprite spr_anim[NUM_FRAMES];
     Vector2 position;
     Vector2 direction;
     float speed;

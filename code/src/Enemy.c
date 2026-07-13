@@ -31,7 +31,6 @@ Enemy *init_enemy_types(void) {
             case NUM_ENEMY_TYPES:
                 break;
         }
-        enemy_types[i].spr_anim = (Sprite*) MemAlloc(sizeof(Sprite) * NUM_FRAMES);
         for (int j=0; j<NUM_FRAMES; j++) {
             char *filepath = (char*) TextFormat("resources/images/enemies/%s/%i.png", enemy_name, j);
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
@@ -45,7 +44,7 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
     new_enemy.is_visible = true;
     new_enemy.position = spawn_point;
     new_enemy.direction = (Vector2) { .x=1, .y=0 };
-    new_enemy.speed = 40.f;
+    new_enemy.speed = 200.f;
     new_enemy.frame_timer = FRAME_TIME;
     new_enemy.current_frame = 0;
 
@@ -65,6 +64,10 @@ void draw_enemy_list(Enemy *enemy_list, int enemy_list_size) {
     for (int i=0; i<enemy_list_size; i++) {
         if (enemy_list[i].is_visible) {
             draw_sprite(&enemy_list[i].spr_anim[enemy_list[i].current_frame], WHITE);
+            // draw_sprite(&enemy_list[i].spr_anim[0], WHITE);
+            // draw_sprite(&enemy_list[i].spr_anim[1], WHITE);
+            // draw_sprite(&enemy_list[i].spr_anim[2], WHITE);
+            // draw_sprite(&enemy_list[i].spr_anim[3], WHITE);
         }
     }
 
@@ -98,15 +101,14 @@ void _update_movement(Enemy *enemy, Vector2 player_position, float dt) {
 
     Vector2 position = enemy->position;
 
-    enemy->direction = player_position;
-    enemy->direction = Vector2Normalize(enemy->direction);
+    enemy->direction = Vector2Normalize(Vector2Subtract(player_position, position));
 
     // update position
-    position.x += enemy->direction.x * enemy->speed * dt;
-    position.y += enemy->direction.y * enemy->speed * dt;
+    position = Vector2Add(position, Vector2Scale(enemy->direction, enemy->speed * dt));
+    enemy->position = position;
 
-    current_sprite->dest_rec.x = position.x;
-    current_sprite->dest_rec.y = position.y;
+    current_sprite->dest_rec.x = enemy->position.x;
+    current_sprite->dest_rec.y = enemy->position.y;
 
     return;
 }

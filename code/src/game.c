@@ -3,7 +3,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "settings.h"
@@ -125,7 +124,6 @@ void _update_game(float dt) {
                 int rand_enemy = GetRandomValue(0, NUM_ENEMY_TYPES-1);
                 int rand_spwn_pnt = GetRandomValue(0, map->num_enemy_spawn_points - 1);
                 enemy_list[i] = instance_enemy(&enemy_types[rand_enemy], map->enemy_spawn_points[rand_spwn_pnt]);
-                printf("\n enemy: %i, at (.x=%.2f, .y=%.2f) \n", i, map->enemy_spawn_points[rand_spwn_pnt].x, map->enemy_spawn_points[rand_spwn_pnt].y);
                 break;
             }
         }
