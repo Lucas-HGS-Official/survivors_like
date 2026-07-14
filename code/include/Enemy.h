@@ -26,11 +26,6 @@ typedef struct Enemy {
     int current_frame;
 } Enemy;
 
-// typedef struct EnemyTypes {
-//     Sprite **spr_list;
-//     Enemy *enemy_list;
-// } EnemyTypes;
-
 
 Enemy *init_enemy_types(void);
 Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point);

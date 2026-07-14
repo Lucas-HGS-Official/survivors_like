@@ -44,7 +44,6 @@ void game_init(void) {
     InitAudioDevice();
     SetTargetFPS(60);
     is_game_running = true;
-    SetRandomSeed(0);
 
     map = init_tilemap();
     recs_list = map->collision_rec_list;
