@@ -36,7 +36,7 @@ void sort_and_draw_sprite_list(Sprite *sprite_list, int sprite_list_size) {
     qsort(sprite_list, sprite_list_size, sizeof(Sprite), _comp_y_value);
 
     for (int i=0; i<sprite_list_size; i++) {
-        if (IsTextureValid(*sprite_list->texture)) {
+        if (sprite_list[i].texture != NULL) {
             draw_sprite(&sprite_list[i], WHITE);
         }
         // DrawRectangleLinesEx(sprite_list[i].dest_rec, 2.f, RED);
@@ -52,6 +52,9 @@ void destroy_sprite(Sprite *sprite) {
 }
 
 int _comp_y_value(const void * elem1, const void * elem2) {
+    if (((Sprite*)elem1)->texture == NULL || ((Sprite*)elem2)->texture == NULL) {
+        return 0;
+    }
 
     float f = ((Sprite*)elem1)->dest_rec.y + ((Sprite*)elem1)->dest_rec.height/2.f;
     float s = ((Sprite*)elem2)->dest_rec.y + ((Sprite*)elem2)->dest_rec.height/2.f;
