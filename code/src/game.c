@@ -44,6 +44,7 @@ void game_init(void) {
     InitAudioDevice();
     SetTargetFPS(60);
     is_game_running = true;
+    SetRandomSeed(0);
 
     map = init_tilemap();
     recs_list = map->collision_rec_list;
@@ -55,10 +56,16 @@ void game_init(void) {
     bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
     enemy_types = init_enemy_types();
 
-    foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size+1));
-    for (int i=0; i<map->obj_blocks_size; i++) {
+    foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size + MAX_NUM_ENEMIES + 1) );
+    int i=0;
+    for (; i<map->obj_blocks_size; i++) {
         foreground_sprites[i] = map->obj_blocks[i].spr;
     }
+    // for (int j=0; j<MAX_NUM_ENEMIES; j++) {
+    //     if (enemy_list[j].is_visible) {
+    //         foreground_sprites[i] = enemy_list[j].spr_anim[0];
+    //     }
+    // }
 
     Sprite *player_sprite = &player->spr[0][0];
     foreground_sprites[map->obj_blocks_size] = *player_sprite;
@@ -104,6 +111,13 @@ void _update_game(float dt) {
     Sprite *current_player_sprite = &player->spr[player->facing_direction][player->current_frame];
     foreground_sprites[map->obj_blocks_size] = *current_player_sprite;
 
+    // for (int i=0; i<MAX_NUM_ENEMIES; i++) {
+    //     if (enemy_list[i].is_visible) {
+    //         Sprite current_enemy_sprite = enemy_list[i].spr_anim[enemy_list[i].current_frame];
+    //         foreground_sprites[map->obj_blocks_size + 1 + i] = current_enemy_sprite;
+    //     }
+    // }
+
     if (IsKeyDown(KEY_SPACE) || IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         for (int i=0; i<MAX_NUM_BULLETS; i++) {
             if(!bullet_list[i].is_visible && fire_timer <= 0) {
@@ -128,7 +142,7 @@ void _update_game(float dt) {
         }
     }
     spawn_enemy_timer -= dt;
-    update_enemy_list(enemy_list, MAX_NUM_ENEMIES, player->position, dt);
+    update_enemy_list(enemy_list, MAX_NUM_ENEMIES, player->position, recs_list, dt);
 
     return;
 }
@@ -138,7 +152,7 @@ void _draw_game(void) {
     ClearBackground(RAYWHITE);
 
     draw_tilemap(map);
-    sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size+1);
+    sort_and_draw_sprite_list(foreground_sprites, map->obj_blocks_size + 1);
     draw_bullet_list(bullet_list, MAX_NUM_BULLETS);
     draw_enemy_list(enemy_list, MAX_NUM_ENEMIES);
     draw_gun(gun);

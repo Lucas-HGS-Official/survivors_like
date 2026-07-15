@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CollisionBoxes.h"
 #include "Sprite.h"
 #include "settings.h"
 #include <raylib.h>
@@ -22,6 +23,7 @@ typedef struct Enemy {
     Vector2 position;
     Vector2 direction;
     float speed;
+    Rectangle hitbox_rec;
     float frame_timer;
     int current_frame;
 } Enemy;
@@ -29,6 +31,6 @@ typedef struct Enemy {
 
 Enemy *init_enemy_types(void);
 Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point);
-void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, float dt);
+void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionRecs *collision_recs_list, float dt);
 void draw_enemy_list(Enemy *enemy_list, int enemy_list_size);
 void destroy_enemy_types(Enemy *enemy_types);
