@@ -36,7 +36,9 @@ void sort_and_draw_sprite_list(Sprite *sprite_list, int sprite_list_size) {
     qsort(sprite_list, sprite_list_size, sizeof(Sprite), _comp_y_value);
 
     for (int i=0; i<sprite_list_size; i++) {
-        draw_sprite(&sprite_list[i], WHITE);
+        if (IsTextureValid(*sprite_list->texture)) {
+            draw_sprite(&sprite_list[i], WHITE);
+        }
         // DrawRectangleLinesEx(sprite_list[i].dest_rec, 2.f, RED);
     }
 

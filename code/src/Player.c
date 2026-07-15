@@ -21,7 +21,7 @@ void _stop_animation(Player *player);
 
 void _controls(Player *player);
 void _movement(Player *player, CollisionRecs *collision_recs_list, float dt);
-void _collision(Player *player, char collision_mode, Rectangle* collision_rec_list, int num_recs);
+void _collision(Player *player, char collision_mode, Rectangle *collision_rec_list, int num_recs);
 
 
 Player *init_player(Vector2 initial_pos) {
@@ -107,18 +107,18 @@ void destroy_player(Player* player) {
     return;
 }
 
-void _collision(Player *player, char collision_mode, Rectangle *hitbox_rec_list, int num_recs) {
-    if (hitbox_rec_list == NULL) {
+void _collision(Player *player, char collision_mode, Rectangle *collision_rec_list, int num_recs) {
+    if (collision_rec_list == NULL) {
         return;
     }
     Rectangle player_hitbox_rec = player->hitbox_rec;
     for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(player_hitbox_rec, hitbox_rec_list[i])) {
+        if (CheckCollisionRecs(player_hitbox_rec, collision_rec_list[i])) {
 
-            float collided_right_side = hitbox_rec_list[i].x + hitbox_rec_list[i].width;
-            float collided_left_left = hitbox_rec_list[i].x;
-            float collided_top_side = hitbox_rec_list[i].y;
-            float collided_bottom_side = hitbox_rec_list[i].y + hitbox_rec_list[i].height;
+            float collided_right_side = collision_rec_list[i].x + collision_rec_list[i].width;
+            float collided_left_left = collision_rec_list[i].x;
+            float collided_top_side = collision_rec_list[i].y;
+            float collided_bottom_side = collision_rec_list[i].y + collision_rec_list[i].height;
 
 
             if (collision_mode == 'h') {
