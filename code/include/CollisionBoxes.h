@@ -2,9 +2,13 @@
 
 #include <raylib.h>
 
+typedef struct CollisionBox {
+    Rectangle rec;
+    int type;
+} CollisionBox;
 
 typedef struct CollisionRecs {
-    Rectangle *recs;
+    CollisionBox *box_list;
     int num;
 } CollisionRecs;
 
