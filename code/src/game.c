@@ -21,7 +21,7 @@ void _draw_game(void);
 
 
 static bool is_game_running = true;
-static CollisionRecs *recs_list = NULL;
+static CollisionBoxList *recs_list = NULL;
 static Sprite *foreground_sprites = NULL;
 
 static Tilemap *map = NULL;
@@ -85,7 +85,7 @@ void game_close(void) {
 
     destroy_enemy_types(enemy_types);
     destroy_bullet(bullet);
-    destroy_collision_recs_list(recs_list);
+    destroy_collision_box_list(recs_list);
     destroy_player(player);
 
     destroy_tilemap(map);

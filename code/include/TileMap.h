@@ -56,7 +56,7 @@ typedef struct Tilemap {
     Rectangle *invisible_recs;
     int invisible_recs_size;
 
-    CollisionRecs *collision_rec_list;
+    CollisionBoxList *collision_rec_list;
     int collission_rec_list_size;
 
     Vector2 *enemy_spawn_points;

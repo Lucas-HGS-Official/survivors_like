@@ -15,11 +15,12 @@ typedef struct CollisionBox {
     CollisionType type;
 } CollisionBox;
 
-typedef struct CollisionRecs {
+typedef struct CollisionBoxList {
     CollisionBox *box_list;
-    int num;
-} CollisionRecs;
+    int size;
+} CollisionBoxList;
 
 
-CollisionRecs *create_collision_recs_list(Rectangle *recs, CollisionType box_type, int recs_num);
-void destroy_collision_recs_list(CollisionRecs *collision_recs_list);
+CollisionBoxList *create_collision_box_list(Rectangle *recs, CollisionType box_type, int recs_num);
+// CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList box_list);
+void destroy_collision_box_list(CollisionBoxList *collision_recs_list);

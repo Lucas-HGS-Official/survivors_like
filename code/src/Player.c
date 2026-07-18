@@ -20,8 +20,8 @@ void _start_animation(Player *player);
 void _stop_animation(Player *player);
 
 void _controls(Player *player);
-void _movement(Player *player, CollisionRecs *collision_recs_list, float dt);
-void _collision(Player *player, char collision_mode, CollisionRecs *collision_rec_list, int num_recs);
+void _movement(Player *player, CollisionBoxList *collision_recs_list, float dt);
+void _collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs);
 
 
 Player *init_player(Vector2 initial_pos) {
@@ -55,7 +55,7 @@ Camera2D *init_player_camera(Player *player) {
 
     return camera;
 }
-void update_player(Player *player, CollisionRecs *collision_recs_list,float dt) {
+void update_player(Player *player, CollisionBoxList *collision_recs_list,float dt) {
     _controls(player);
 
     // Animation state machine
@@ -107,7 +107,7 @@ void destroy_player(Player* player) {
     return;
 }
 
-void _collision(Player *player, char collision_mode, CollisionRecs *collision_rec_list, int num_recs) {
+void _collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs) {
     if (collision_rec_list == NULL) {
         return;
     }
@@ -183,14 +183,14 @@ void _controls(Player *player) {
     return;
 }
 
-void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
+void _movement(Player *player, CollisionBoxList *collision_recs_list, float dt) {
     // Player movement
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
 
     player->hitbox_rec.x += player->direction.x * player->speed * dt;
-    _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
+    _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
-    _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
+    _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
 
     player->position = (Vector2) {
         .x = player->hitbox_rec.x - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f,

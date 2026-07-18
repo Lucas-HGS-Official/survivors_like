@@ -19,8 +19,8 @@
 
 
 void _update_animation(Enemy *enemy, float dt);
-void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *collision_recs_list, float dt);
-void _update_collision(Enemy *enemy, char collision_mode, CollisionRecs *collision_rec_list, int num_recs);
+void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBoxList *collision_recs_list, float dt);
+void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs);
 
 
 Enemy *init_enemy_types(void) {
@@ -70,7 +70,7 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
 
     return new_enemy;
 }
-void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionRecs *collision_recs_list, float dt) {
+void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_recs_list, float dt) {
     for (int i=0; i<enemy_list_size; i++) {
         if (enemy_list[i].is_visible) {
             _update_animation(&enemy_list[i], dt);
@@ -116,7 +116,7 @@ void _update_animation(Enemy *enemy, float dt) {
 
     return;
 }
-void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *collision_recs_list, float dt) {
+void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBoxList *collision_recs_list, float dt) {
     Sprite *current_sprite = &enemy->spr_anim[enemy->current_frame];
 
     enemy->direction = Vector2Normalize(Vector2Subtract(player_position, enemy->position));
@@ -125,10 +125,10 @@ void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *coll
     // enemy->position = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt));
     // enemy->hitbox_rec.x = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).x;
     enemy->hitbox_rec.x += enemy->direction.x * enemy->speed * dt;
-    _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
+    _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
     // enemy->hitbox_rec.y = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).y;
     enemy->hitbox_rec.y += enemy->direction.y * enemy->speed * dt;
-    _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
+    _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
 
     enemy->position.x = enemy->hitbox_rec.x - HORIZONTAL_ENEMY_SPR_PADDING;
     enemy->position.y = enemy->hitbox_rec.y - VERTICAL_ENEMY_SPR_PADDING;
@@ -138,7 +138,7 @@ void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *coll
 
     return;
 }
-void _update_collision(Enemy *enemy, char collision_mode, CollisionRecs *collision_rec_list, int num_recs) {
+void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs) {
     if (collision_rec_list == NULL) {
         return;
     }
