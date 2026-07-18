@@ -1,7 +1,7 @@
 #include "CollisionBoxes.h"
 
 
-CollisionRecs *create_collision_recs_list(Rectangle *recs, int recs_num) {
+CollisionRecs *create_collision_recs_list(Rectangle *recs, CollisionType box_type, int recs_num) {
     CollisionRecs *collision_recs_list = (CollisionRecs*) MemAlloc(sizeof(CollisionRecs));
     collision_recs_list->num = recs_num;
 
@@ -9,7 +9,7 @@ CollisionRecs *create_collision_recs_list(Rectangle *recs, int recs_num) {
 
     for (int i=0; i<collision_recs_list->num; i++) {
         collision_recs_list->box_list[i].rec = recs[i];
-        collision_recs_list->box_list[i].type;
+        collision_recs_list->box_list[i].type = box_type;
     }
 
     return collision_recs_list;

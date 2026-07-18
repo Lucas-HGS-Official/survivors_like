@@ -114,8 +114,8 @@ Tilemap *init_tilemap(void) {
         }
         current_layer = current_layer->next;
     }
-    Rectangle *recs =_alloc_map_collision_recs(map);
-    map->collision_rec_list = create_collision_recs_list(recs, map->collission_rec_list_size);
+    Rectangle *recs = _alloc_map_collision_recs(map);
+    map->collision_rec_list = create_collision_recs_list(recs, ENV_COLLISION_TYPE, map->collission_rec_list_size);
     _free_map_collision_recs(recs);
 
     return map;

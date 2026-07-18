@@ -20,7 +20,7 @@
 
 void _update_animation(Enemy *enemy, float dt);
 void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *collision_recs_list, float dt);
-void _update_collision(Enemy *enemy, char collision_mode, Rectangle* collision_rec_list, int num_recs);
+void _update_collision(Enemy *enemy, char collision_mode, CollisionRecs *collision_rec_list, int num_recs);
 
 
 Enemy *init_enemy_types(void) {
@@ -125,10 +125,10 @@ void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *coll
     // enemy->position = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt));
     // enemy->hitbox_rec.x = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).x;
     enemy->hitbox_rec.x += enemy->direction.x * enemy->speed * dt;
-    _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
+    _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
     // enemy->hitbox_rec.y = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).y;
     enemy->hitbox_rec.y += enemy->direction.y * enemy->speed * dt;
-    _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
+    _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
 
     enemy->position.x = enemy->hitbox_rec.x - HORIZONTAL_ENEMY_SPR_PADDING;
     enemy->position.y = enemy->hitbox_rec.y - VERTICAL_ENEMY_SPR_PADDING;
@@ -138,18 +138,18 @@ void _update_movement(Enemy *enemy, Vector2 player_position, CollisionRecs *coll
 
     return;
 }
-void _update_collision(Enemy *enemy, char collision_mode, Rectangle *collision_rec_list, int num_recs) {
+void _update_collision(Enemy *enemy, char collision_mode, CollisionRecs *collision_rec_list, int num_recs) {
     if (collision_rec_list == NULL) {
         return;
     }
     Rectangle enemy_hitbox_rec = enemy->hitbox_rec;
     for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(enemy_hitbox_rec, collision_rec_list[i])) {
+        if (CheckCollisionRecs(enemy_hitbox_rec, collision_rec_list->box_list[i].rec)) {
 
-            float collided_right_side = collision_rec_list[i].x + collision_rec_list[i].width;
-            float collided_left_left = collision_rec_list[i].x;
-            float collided_top_side = collision_rec_list[i].y;
-            float collided_bottom_side = collision_rec_list[i].y + collision_rec_list[i].height;
+            float collided_right_side = collision_rec_list->box_list[i].rec.x + collision_rec_list->box_list[i].rec.width;
+            float collided_left_left = collision_rec_list->box_list[i].rec.x;
+            float collided_top_side = collision_rec_list->box_list[i].rec.y;
+            float collided_bottom_side = collision_rec_list->box_list[i].rec.y + collision_rec_list->box_list[i].rec.height;
 
             if (collision_mode == 'h') {
                 if (enemy->direction.x > 0) {

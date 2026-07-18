@@ -21,7 +21,7 @@ void _stop_animation(Player *player);
 
 void _controls(Player *player);
 void _movement(Player *player, CollisionRecs *collision_recs_list, float dt);
-void _collision(Player *player, char collision_mode, Rectangle *collision_rec_list, int num_recs);
+void _collision(Player *player, char collision_mode, CollisionRecs *collision_rec_list, int num_recs);
 
 
 Player *init_player(Vector2 initial_pos) {
@@ -107,18 +107,18 @@ void destroy_player(Player* player) {
     return;
 }
 
-void _collision(Player *player, char collision_mode, Rectangle *collision_rec_list, int num_recs) {
+void _collision(Player *player, char collision_mode, CollisionRecs *collision_rec_list, int num_recs) {
     if (collision_rec_list == NULL) {
         return;
     }
     Rectangle player_hitbox_rec = player->hitbox_rec;
     for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(player_hitbox_rec, collision_rec_list[i])) {
+        if (CheckCollisionRecs(player_hitbox_rec, collision_rec_list->box_list[i].rec)) {
 
-            float collided_right_side = collision_rec_list[i].x + collision_rec_list[i].width;
-            float collided_left_left = collision_rec_list[i].x;
-            float collided_top_side = collision_rec_list[i].y;
-            float collided_bottom_side = collision_rec_list[i].y + collision_rec_list[i].height;
+            float collided_right_side = collision_rec_list->box_list[i].rec.x + collision_rec_list->box_list[i].rec.width;
+            float collided_left_left = collision_rec_list->box_list[i].rec.x;
+            float collided_top_side = collision_rec_list->box_list[i].rec.y;
+            float collided_bottom_side = collision_rec_list->box_list[i].rec.y + collision_rec_list->box_list[i].rec.height;
 
 
             if (collision_mode == 'h') {
@@ -188,9 +188,9 @@ void _movement(Player *player, CollisionRecs *collision_recs_list, float dt) {
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
 
     player->hitbox_rec.x += player->direction.x * player->speed * dt;
-    _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
+    _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
-    _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list->recs, collision_recs_list->num);
+    _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->num);
 
     player->position = (Vector2) {
         .x = player->hitbox_rec.x - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f,
