@@ -1,6 +1,7 @@
 #pragma once
 
 #include <raylib.h>
+#include <stdbool.h>
 
 
 typedef enum CollisionType {
@@ -22,5 +23,5 @@ typedef struct CollisionBoxList {
 
 
 CollisionBoxList *create_collision_box_list(Rectangle *recs, CollisionType box_type, int recs_num);
-// CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList box_list);
+CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList box_list);
 void destroy_collision_box_list(CollisionBoxList *collision_recs_list);
