@@ -42,7 +42,7 @@ static Enemy enemy_list[MAX_NUM_ENEMIES] = {0};
 void game_init(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_NAME);
     InitAudioDevice();
-    SetTargetFPS(60);
+    SetTargetFPS(120);
     is_game_running = true;
     SetRandomSeed(0);
 
