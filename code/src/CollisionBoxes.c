@@ -7,24 +7,24 @@ CollisionBoxList *create_collision_box_list(Rectangle *recs, CollisionType box_t
     CollisionBoxList *collision_recs_list = (CollisionBoxList*) MemAlloc(sizeof(CollisionBoxList));
     collision_recs_list->size = recs_num;
 
-    collision_recs_list->box_list = (CollisionBox*) MemAlloc(sizeof(CollisionBox) * recs_num);
+    collision_recs_list->list = (CollisionBox*) MemAlloc(sizeof(CollisionBox) * recs_num);
 
     for (int i=0; i<collision_recs_list->size; i++) {
-        collision_recs_list->box_list[i].rec = recs[i];
-        collision_recs_list->box_list[i].type = box_type;
+        collision_recs_list->list[i].rec = recs[i];
+        collision_recs_list->list[i].type = box_type;
     }
 
     return collision_recs_list;
 }
 
-CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList box_list) {
+CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList *box_list) {
     CollisionBox collided_box = {0};
 
-    for (int i=0; i<box_list.size; i++) {
-        if (_is_collision_box_identical(box, box_list.box_list[i])) {
-            return box;
-        }
-        if (CheckCollisionRecs(box.rec, box_list.box_list[i].rec)) {
+    for (int i=0; i<box_list->size; i++) {
+        if (_is_collision_box_identical(box, box_list->list[i])) {
+            continue;
+        } else if (CheckCollisionRecs(box.rec, box_list->list[i].rec)) {
+            collided_box = box_list->list[i];
             return collided_box;
         }
     }
@@ -33,7 +33,7 @@ CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList box_lis
 }
 
 void destroy_collision_box_list(CollisionBoxList *collision_recs_list) {
-    MemFree(collision_recs_list->box_list);
+    MemFree(collision_recs_list->list);
     MemFree(collision_recs_list);
 
     return;

@@ -122,11 +122,8 @@ void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBoxList *c
     enemy->direction = Vector2Normalize(Vector2Subtract(player_position, enemy->position));
 
     // update position
-    // enemy->position = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt));
-    // enemy->hitbox_rec.x = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).x;
     enemy->hitbox_rec.x += enemy->direction.x * enemy->speed * dt;
     _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
-    // enemy->hitbox_rec.y = Vector2Add(enemy->position, Vector2Scale(enemy->direction, enemy->speed * dt)).y;
     enemy->hitbox_rec.y += enemy->direction.y * enemy->speed * dt;
     _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list, collision_recs_list->size);
 
@@ -142,29 +139,32 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
     if (collision_rec_list == NULL) {
         return;
     }
-    Rectangle enemy_hitbox_rec = enemy->hitbox_rec;
-    for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(enemy_hitbox_rec, collision_rec_list->box_list[i].rec)) {
 
-            float collided_right_side = collision_rec_list->box_list[i].rec.x + collision_rec_list->box_list[i].rec.width;
-            float collided_left_left = collision_rec_list->box_list[i].rec.x;
-            float collided_top_side = collision_rec_list->box_list[i].rec.y;
-            float collided_bottom_side = collision_rec_list->box_list[i].rec.y + collision_rec_list->box_list[i].rec.height;
+    CollisionBox enemy_box = {
+        .rec = enemy->hitbox_rec,
+        .type = PLAYER_COLLISION_TYPE,
+    };
+    CollisionBox colllided_box = check_collision_box_list(enemy_box, collision_rec_list);
 
-            if (collision_mode == 'h') {
-                if (enemy->direction.x > 0) {
-                    enemy->hitbox_rec.x = collided_left_left - enemy_hitbox_rec.width;
-                }
-                if (enemy->direction.x < 0) {
-                    enemy->hitbox_rec.x = collided_right_side;
-                }
-            } else {
-                if (enemy->direction.y > 0) {
-                    enemy->hitbox_rec.y = collided_top_side - enemy_hitbox_rec.height;
-                }
-                if (enemy->direction.y < 0) {
-                    enemy->hitbox_rec.y = collided_bottom_side;
-                }
+    if (colllided_box.type == ENV_COLLISION_TYPE) {
+        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
+        float collided_left_left = colllided_box.rec.x;
+        float collided_top_side = colllided_box.rec.y;
+        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
+
+        if (collision_mode == 'h') {
+            if (enemy->direction.x > 0) {
+                enemy->hitbox_rec.x = collided_left_left - enemy->hitbox_rec.width;
+            }
+            if (enemy->direction.x < 0) {
+                enemy->hitbox_rec.x = collided_right_side;
+            }
+        } else {
+            if (enemy->direction.y > 0) {
+                enemy->hitbox_rec.y = collided_top_side - enemy->hitbox_rec.height;
+            }
+            if (enemy->direction.y < 0) {
+                enemy->hitbox_rec.y = collided_bottom_side;
             }
         }
     }

@@ -4,6 +4,7 @@
 #include <raymath.h>
 #include <stdio.h>
 
+#include "CollisionBoxes.h"
 #include "settings.h"
 #include "Sprite.h"
 
@@ -21,7 +22,7 @@ void _stop_animation(Player *player);
 
 void _controls(Player *player);
 void _movement(Player *player, CollisionBoxList *collision_recs_list, float dt);
-void _collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs);
+static void _collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list, int num_recs);
 
 
 Player *init_player(Vector2 initial_pos) {
@@ -111,30 +112,33 @@ void _collision(Player *player, char collision_mode, CollisionBoxList *collision
     if (collision_rec_list == NULL) {
         return;
     }
-    Rectangle player_hitbox_rec = player->hitbox_rec;
-    for (int i=0; i<num_recs; i++) {
-        if (CheckCollisionRecs(player_hitbox_rec, collision_rec_list->box_list[i].rec)) {
 
-            float collided_right_side = collision_rec_list->box_list[i].rec.x + collision_rec_list->box_list[i].rec.width;
-            float collided_left_left = collision_rec_list->box_list[i].rec.x;
-            float collided_top_side = collision_rec_list->box_list[i].rec.y;
-            float collided_bottom_side = collision_rec_list->box_list[i].rec.y + collision_rec_list->box_list[i].rec.height;
+    CollisionBox player_box = {
+        .rec = player->hitbox_rec,
+        .type = PLAYER_COLLISION_TYPE,
+    };
+    CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
+
+    if (colllided_box.type == ENV_COLLISION_TYPE) {
+        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
+        float collided_left_left = colllided_box.rec.x;
+        float collided_top_side = colllided_box.rec.y;
+        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
 
 
-            if (collision_mode == 'h') {
-                if (player->direction.x > 0) {
-                    player->hitbox_rec.x = collided_left_left - player_hitbox_rec.width;
-                }
-                if (player->direction.x < 0) {
-                    player->hitbox_rec.x = collided_right_side;
-                }
-            } else {
-                if (player->direction.y > 0) {
-                    player->hitbox_rec.y = collided_top_side - player_hitbox_rec.height;
-                }
-                if (player->direction.y < 0) {
-                    player->hitbox_rec.y = collided_bottom_side;
-                }
+        if (collision_mode == 'h') {
+            if (player->direction.x > 0) {
+                player->hitbox_rec.x = collided_left_left - player->hitbox_rec.width;
+            }
+            if (player->direction.x < 0) {
+                player->hitbox_rec.x = collided_right_side;
+            }
+        } else {
+            if (player->direction.y > 0) {
+                player->hitbox_rec.y = collided_top_side - player->hitbox_rec.height;
+            }
+            if (player->direction.y < 0) {
+                player->hitbox_rec.y = collided_bottom_side;
             }
         }
     }
