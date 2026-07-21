@@ -30,7 +30,7 @@ typedef struct Enemy {
 
 typedef struct EnemyList {
     Enemy list[MAX_NUM_ENEMIES];
-    CollisionBoxList collision_list[MAX_NUM_ENEMIES];
+    CollisionBoxList collision_list;
     int num;
 } EnemyList;
 
