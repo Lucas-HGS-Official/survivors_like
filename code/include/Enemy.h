@@ -28,6 +28,12 @@ typedef struct Enemy {
     int current_frame;
 } Enemy;
 
+typedef struct EnemyList {
+    Enemy list[MAX_NUM_ENEMIES];
+    CollisionBoxList collision_list[MAX_NUM_ENEMIES];
+    int num;
+} EnemyList;
+
 
 Enemy *init_enemy_types(void);
 Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point);

@@ -36,7 +36,7 @@ static Bullet bullet_list[MAX_NUM_BULLETS] = {0};
 
 static float spawn_enemy_timer = 0;
 static Enemy *enemy_types = NULL;
-static Enemy enemy_list[MAX_NUM_ENEMIES] = {0};
+static EnemyList enemy_list = {0};
 
 
 void game_init(void) {
@@ -61,8 +61,8 @@ void game_init(void) {
         foreground_sprites[i] = map->obj_blocks[i].spr;
     }
     for (int j=0; j<MAX_NUM_ENEMIES; j++) {
-        if (enemy_list[j].is_visible) {
-            foreground_sprites[map->obj_blocks_size + 1 + j] = enemy_list[j].spr_anim[0];
+        if (enemy_list.list[j].is_visible) {
+            foreground_sprites[map->obj_blocks_size + 1 + j] = enemy_list.list[j].spr_anim[0];
         }
     }
 
@@ -112,8 +112,8 @@ void _update_game(float dt) {
     Sprite current_player_sprite = player->spr[player->facing_direction][player->current_frame];
     foreground_sprites[map->obj_blocks_size] = current_player_sprite;
     for (int j=0; j<MAX_NUM_ENEMIES; j++) {
-        if (enemy_list[j].is_visible) {
-            Sprite current_enemy_sprite = enemy_list[j].spr_anim[enemy_list[j].current_frame];
+        if (enemy_list.list[j].is_visible) {
+            Sprite current_enemy_sprite = enemy_list.list[j].spr_anim[enemy_list.list[j].current_frame];
             foreground_sprites[map->obj_blocks_size + 1 + j] = current_enemy_sprite;
         }
     }
@@ -133,16 +133,17 @@ void _update_game(float dt) {
     if (spawn_enemy_timer <= 0) {
         spawn_enemy_timer = 3.f;
         for (int i=0; i<MAX_NUM_ENEMIES; i++) {
-            if (!enemy_list[i].is_visible) {
+            if (!enemy_list.list[i].is_visible) {
                 int rand_enemy = GetRandomValue(0, NUM_ENEMY_TYPES-1);
                 int rand_spwn_pnt = GetRandomValue(0, map->num_enemy_spawn_points - 1);
-                enemy_list[i] = instance_enemy(&enemy_types[rand_enemy], map->enemy_spawn_points[rand_spwn_pnt]);
+                enemy_list.list[i] = instance_enemy(&enemy_types[rand_enemy], map->enemy_spawn_points[rand_spwn_pnt]);
+                enemy_list.num++;
                 break;
             }
         }
     }
     spawn_enemy_timer -= dt;
-    update_enemy_list(enemy_list, MAX_NUM_ENEMIES, player->position, recs_list, dt);
+    update_enemy_list(enemy_list.list, MAX_NUM_ENEMIES, player->position, recs_list, dt);
 
     return;
 }
