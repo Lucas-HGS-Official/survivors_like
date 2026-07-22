@@ -17,7 +17,7 @@ void _load_tiled_obj_sprites(Tilemap *map);
 
 static int _comp_y_value(const void * elem1, const void * elem2);
 
-Tilemap *init_tilemap(void) {
+Tilemap *init_tilemap(CollisionBoxList *collision_boxes) {
     Tilemap *map = (Tilemap*)MemAlloc(sizeof(Tilemap));
 
     _load_tiled_tilemap(map);
@@ -115,7 +115,7 @@ Tilemap *init_tilemap(void) {
         current_layer = current_layer->next;
     }
     Rectangle *recs = _alloc_map_collision_recs(map);
-    // map->collision_rec_list = create_collision_box_list(recs, ENV_COLLISION_TYPE, map->collission_rec_list_size);
+    create_collision_box_list(collision_boxes, recs, ENV_COLLISION_TYPE, map->collission_rec_list_size);
     _free_map_collision_recs(recs);
 
     return map;

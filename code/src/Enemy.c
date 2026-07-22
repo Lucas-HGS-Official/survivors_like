@@ -18,9 +18,9 @@
 #define VERTICAL_COLLISION_MODE 'v'
 
 
-void _update_animation(Enemy *enemy, float dt);
-void _update_movement(Enemy *enemy, Vector2 player_position, float dt);//, CollisionBoxList **collision_recs_list, float dt);
-// void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList **collision_rec_list);
+static void _update_animation(Enemy *enemy, float dt);
+static void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBoxList *collision_boxes, float dt);
+void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *collision_rec_list);
 
 
 Enemy *init_enemy_types(void) {
@@ -70,11 +70,11 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
 
     return new_enemy;
 }
-void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, float dt) {//, CollisionBoxList **collision_recs_list, float dt);)
+void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_boxes, float dt) {
     for (int i=0; i<enemy_list_size; i++) {
         if (enemy_list[i].is_visible) {
             _update_animation(&enemy_list[i], dt);
-            _update_movement(&enemy_list[i], player_position, dt); //, collision_recs_list, dt);
+            _update_movement(&enemy_list[i], player_position, collision_boxes, dt);
         }
     }
 
@@ -84,10 +84,6 @@ void draw_enemy_list(Enemy *enemy_list, int enemy_list_size) {
     for (int i=0; i<enemy_list_size; i++) {
         if (enemy_list[i].is_visible) {
             draw_sprite(&enemy_list[i].spr_anim[enemy_list[i].current_frame], WHITE);
-            // draw_sprite(&enemy_list[i].spr_anim[0], WHITE);
-            // draw_sprite(&enemy_list[i].spr_anim[1], WHITE);
-            // draw_sprite(&enemy_list[i].spr_anim[2], WHITE);
-            // draw_sprite(&enemy_list[i].spr_anim[3], WHITE);
         }
     }
 
@@ -116,16 +112,16 @@ void _update_animation(Enemy *enemy, float dt) {
 
     return;
 }
-void _update_movement(Enemy *enemy, Vector2 player_position, float dt) {// CollisionBoxList **collision_recs_list, float dt) {
+void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBoxList *collision_boxes, float dt) {
     Sprite *current_sprite = &enemy->spr_anim[enemy->current_frame];
 
     enemy->direction = Vector2Normalize(Vector2Subtract(player_position, enemy->position));
 
     // update position
     enemy->hitbox_rec.x += enemy->direction.x * enemy->speed * dt;
-    // _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_recs_list);
+    _update_collision(enemy, HORIZONTAL_COLLISION_MODE, collision_boxes);
     enemy->hitbox_rec.y += enemy->direction.y * enemy->speed * dt;
-    // _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_recs_list);
+    _update_collision(enemy, VERTICAL_COLLISION_MODE, collision_boxes);
 
     enemy->position.x = enemy->hitbox_rec.x - HORIZONTAL_ENEMY_SPR_PADDING;
     enemy->position.y = enemy->hitbox_rec.y - VERTICAL_ENEMY_SPR_PADDING;
@@ -135,39 +131,39 @@ void _update_movement(Enemy *enemy, Vector2 player_position, float dt) {// Colli
 
     return;
 }
-// void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList **collision_rec_list) {
-//     if (collision_rec_list == NULL) {
-//         return;
-//     }
+void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *collision_rec_list) {
+    if (collision_rec_list == NULL) {
+        return;
+    }
 
-//     CollisionBox enemy_box = {
-//         .rec = enemy->hitbox_rec,
-//         .type = PLAYER_COLLISION_TYPE,
-//     };
-//     CollisionBox colllided_box = check_collision_box_list(enemy_box, collision_rec_list);
+    CollisionBox enemy_box = {
+        .rec = enemy->hitbox_rec,
+        .type = PLAYER_COLLISION_TYPE,
+    };
+    CollisionBox colllided_box = check_collision_box_list(enemy_box, collision_rec_list);
 
-//     if (colllided_box.type == ENV_COLLISION_TYPE) {
-//         float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
-//         float collided_left_left = colllided_box.rec.x;
-//         float collided_top_side = colllided_box.rec.y;
-//         float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
+    if (colllided_box.type == ENV_COLLISION_TYPE) {
+        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
+        float collided_left_left = colllided_box.rec.x;
+        float collided_top_side = colllided_box.rec.y;
+        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
 
-//         if (collision_mode == 'h') {
-//             if (enemy->direction.x > 0) {
-//                 enemy->hitbox_rec.x = collided_left_left - enemy->hitbox_rec.width;
-//             }
-//             if (enemy->direction.x < 0) {
-//                 enemy->hitbox_rec.x = collided_right_side;
-//             }
-//         } else {
-//             if (enemy->direction.y > 0) {
-//                 enemy->hitbox_rec.y = collided_top_side - enemy->hitbox_rec.height;
-//             }
-//             if (enemy->direction.y < 0) {
-//                 enemy->hitbox_rec.y = collided_bottom_side;
-//             }
-//         }
-//     }
+        if (collision_mode == 'h') {
+            if (enemy->direction.x > 0) {
+                enemy->hitbox_rec.x = collided_left_left - enemy->hitbox_rec.width;
+            }
+            if (enemy->direction.x < 0) {
+                enemy->hitbox_rec.x = collided_right_side;
+            }
+        } else {
+            if (enemy->direction.y > 0) {
+                enemy->hitbox_rec.y = collided_top_side - enemy->hitbox_rec.height;
+            }
+            if (enemy->direction.y < 0) {
+                enemy->hitbox_rec.y = collided_bottom_side;
+            }
+        }
+    }
 
-//     return;
-// }
+    return;
+}

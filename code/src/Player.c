@@ -15,20 +15,20 @@
 #define VERTICAL_COLLISION_MODE 'v'
 
 
-void _load_player_sprites(Player *player);
+static void _load_sprites(Player *player);
 
-void _start_animation(Player *player);
-void _stop_animation(Player *player);
+static void _start_animation(Player *player);
+static void _stop_animation(Player *player);
 
-void _controls(Player *player);
-void _movement(Player *player, float dt);// CollisionBoxList **collision_recs_list, float dt);
-// static void _collision(Player *player, char collision_mode, CollisionBoxList **collision_rec_list);
+static void _update_controls(Player *player);
+static void _update_movement(Player *player, CollisionBoxList *collision_boxes, float dt);
+static void _update_collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list);
 
 
 Player *init_player(Vector2 initial_pos) {
     Player *player = (Player*) MemAlloc(sizeof(Player));
 
-    _load_player_sprites(player);
+    _load_sprites(player);
 
     player->direction = (Vector2) {0};
     player->speed = 400.f;
@@ -56,8 +56,8 @@ Camera2D *init_player_camera(Player *player) {
 
     return camera;
 }
-void update_player(Player *player, float dt) {//, CollisionBoxList **collision_recs_list, float dt) {
-    _controls(player);
+void update_player(Player *player, CollisionBoxList *collision_boxes, float dt) {
+    _update_controls(player);
 
     // Animation state machine
     switch (player->anim_state) {
@@ -78,7 +78,7 @@ void update_player(Player *player, float dt) {//, CollisionBoxList **collision_r
             break;
     }
 
-    _movement(player, dt);//, collision_recs_list, dt);
+    _update_movement(player, collision_boxes, dt);
 
     return;
 }
@@ -108,41 +108,41 @@ void destroy_player(Player* player) {
     return;
 }
 
-// void _collision(Player *player, char collision_mode, CollisionBoxList **collision_rec_list) {
-//     if (collision_rec_list == NULL) {
-//         return;
-//     }
+void _update_collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list) {
+    if (collision_rec_list == NULL) {
+        return;
+    }
 
-//     CollisionBox player_box = {
-//         .rec = player->hitbox_rec,
-//         .type = PLAYER_COLLISION_TYPE,
-//     };
-//     CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
+    CollisionBox player_box = {
+        .rec = player->hitbox_rec,
+        .type = PLAYER_COLLISION_TYPE,
+    };
+    CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
 
-//     if (colllided_box.type == ENV_COLLISION_TYPE) {
-//         float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
-//         float collided_left_left = colllided_box.rec.x;
-//         float collided_top_side = colllided_box.rec.y;
-//         float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
+    if (colllided_box.type == ENV_COLLISION_TYPE) {
+        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
+        float collided_left_left = colllided_box.rec.x;
+        float collided_top_side = colllided_box.rec.y;
+        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
 
 
-//         if (collision_mode == 'h') {
-//             if (player->direction.x > 0) {
-//                 player->hitbox_rec.x = collided_left_left - player->hitbox_rec.width;
-//             }
-//             if (player->direction.x < 0) {
-//                 player->hitbox_rec.x = collided_right_side;
-//             }
-//         } else {
-//             if (player->direction.y > 0) {
-//                 player->hitbox_rec.y = collided_top_side - player->hitbox_rec.height;
-//             }
-//             if (player->direction.y < 0) {
-//                 player->hitbox_rec.y = collided_bottom_side;
-//             }
-//         }
-//     }
-// }
+        if (collision_mode == HORIZONTAL_COLLISION_MODE) {
+            if (player->direction.x > 0) {
+                player->hitbox_rec.x = collided_left_left - player->hitbox_rec.width;
+            }
+            if (player->direction.x < 0) {
+                player->hitbox_rec.x = collided_right_side;
+            }
+        } else {
+            if (player->direction.y > 0) {
+                player->hitbox_rec.y = collided_top_side - player->hitbox_rec.height;
+            }
+            if (player->direction.y < 0) {
+                player->hitbox_rec.y = collided_bottom_side;
+            }
+        }
+    }
+}
 
 void _start_animation(Player *player) {
     player->anim_state = WALKING_PLAYER;
@@ -157,7 +157,7 @@ void _stop_animation(Player *player) {
     return;
 }
 
-void _controls(Player *player) {
+void _update_controls(Player *player) {
     float up_move = (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W));
     float down_move = (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S));
     float right_move = (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D));
@@ -187,14 +187,14 @@ void _controls(Player *player) {
     return;
 }
 
-void _movement(Player *player, float dt) {//, CollisionBoxList **collision_recs_list, float dt) {
+void _update_movement(Player *player, CollisionBoxList *collision_boxes, float dt) {
     // Player movement
     Sprite *current_sprite = &player->spr[player->facing_direction][player->current_frame];
 
     player->hitbox_rec.x += player->direction.x * player->speed * dt;
-    // _collision(player, HORIZONTAL_COLLISION_MODE, collision_recs_list);
+    _update_collision(player, HORIZONTAL_COLLISION_MODE, collision_boxes);
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
-    // _collision(player, VERTICAL_COLLISION_MODE, collision_recs_list);
+    _update_collision(player, VERTICAL_COLLISION_MODE, collision_boxes);
 
     player->position = (Vector2) {
         .x = player->hitbox_rec.x - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f,
@@ -207,7 +207,7 @@ void _movement(Player *player, float dt) {//, CollisionBoxList **collision_recs_
     return;
 }
 
-void _load_player_sprites(Player *player) {
+void _load_sprites(Player *player) {
     // Loading all images for each player frame
     for (int i=0; i<NUM_FACE_PLAYER; i++) {
         char *facing_dir = "";
