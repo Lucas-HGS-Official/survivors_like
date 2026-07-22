@@ -21,7 +21,7 @@ void _draw_game(void);
 
 
 static bool is_game_running = true;
-static CollisionBoxList *Collision_box_list = NULL;
+// static CollisionBoxList **Collision_box_list = NULL;
 static Sprite *foreground_sprites = NULL;
 
 static Tilemap *map = NULL;
@@ -45,9 +45,10 @@ void game_init(void) {
     SetTargetFPS(120);
     is_game_running = true;
     SetRandomSeed(0);
+    // Collision_box_list = (CollisionBoxList**)MemAlloc(sizeof(CollisionBoxList*)*NUM_COLLISION_TYPES);
 
     map = init_tilemap();
-    Collision_box_list = map->collision_rec_list;
+    // Collision_box_list[ENV_COLLISION_TYPE] = map->collision_rec_list;
 
     player = init_player(map->player_initial_pos);
     camera = init_player_camera(player);
@@ -55,7 +56,7 @@ void game_init(void) {
     bullet = init_bullet();
     bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
     enemy_types = init_enemy_types();
-    enemy_list.collision_list.list = (CollisionBox*)MemAlloc(sizeof(CollisionBox) * MAX_NUM_ENEMIES);
+    // enemy_list.collision_list.list = (CollisionBox*)MemAlloc(sizeof(CollisionBox) * MAX_NUM_ENEMIES);
 
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size + MAX_NUM_ENEMIES + 1) );
     for (int i=0; i<map->obj_blocks_size; i++) {
@@ -84,9 +85,14 @@ void game_close(void) {
     MemFree(camera);
     MemFree(foreground_sprites);
 
+    // for (int i=0; i<NUM_COLLISION_TYPES; i++) {
+    //     destroy_collision_box_list(Collision_box_list[i]);
+    // }
+    // MemFree(Collision_box_list);
+
     destroy_enemy_types(enemy_types);
+
     destroy_bullet(bullet);
-    destroy_collision_box_list(Collision_box_list);
     destroy_player(player);
 
     destroy_tilemap(map);
@@ -100,7 +106,7 @@ void game_close(void) {
 void _update_game(float dt) {
     if (WindowShouldClose()) { is_game_running = false; }
 
-    update_player(player, Collision_box_list, dt);
+    update_player(player, dt);//Collision_box_list, dt);
     update_player_camera(camera, player);
     update_gun(gun, player);
 
@@ -138,15 +144,15 @@ void _update_game(float dt) {
                 int rand_enemy = GetRandomValue(0, NUM_ENEMY_TYPES-1);
                 int rand_spwn_pnt = GetRandomValue(0, map->num_enemy_spawn_points - 1);
                 enemy_list.list[i] = instance_enemy(&enemy_types[rand_enemy], map->enemy_spawn_points[rand_spwn_pnt]);
-                enemy_list.collision_list.list[i].rec = enemy_types[rand_enemy].hitbox_rec;
-                enemy_list.collision_list.list[i].type = ENEMY_COLLISION_TYPE;
+                // enemy_list.collision_list.list[i].rec = enemy_types[rand_enemy].hitbox_rec;
+                // enemy_list.collision_list.list[i].type = ENEMY_COLLISION_TYPE;
                 enemy_list.num++;
                 break;
             }
         }
     }
     spawn_enemy_timer -= dt;
-    update_enemy_list(enemy_list.list, MAX_NUM_ENEMIES, player->position, Collision_box_list, dt);
+    update_enemy_list(enemy_list.list, MAX_NUM_ENEMIES, player->position, dt);//, Collision_box_list, dt);
 
     return;
 }

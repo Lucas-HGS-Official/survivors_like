@@ -30,13 +30,13 @@ typedef struct Enemy {
 
 typedef struct EnemyList {
     Enemy list[MAX_NUM_ENEMIES];
-    CollisionBoxList collision_list;
+    // CollisionBoxList collision_list;
     int num;
 } EnemyList;
 
 
 Enemy *init_enemy_types(void);
 Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point);
-void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_recs_list, float dt);
+void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, float dt);//, CollisionBoxList **collision_recs_list, float dt);
 void draw_enemy_list(Enemy *enemy_list, int enemy_list_size);
 void destroy_enemy_types(Enemy *enemy_types);
