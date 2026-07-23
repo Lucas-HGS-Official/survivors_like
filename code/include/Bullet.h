@@ -12,6 +12,7 @@
 
 typedef struct Bullet {
     bool is_visible;
+    bool is_marked_for_deletion;
     Vector2 direction;
     Sprite spr;
     float speed;

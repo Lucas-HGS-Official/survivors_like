@@ -2,9 +2,17 @@
 
 #include <raylib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "CollisionBoxes.h"
 #include "Sprite.h"
+
+
+#define HORIZONTAL_COLLISION_MODE 'h'
+#define VERTICAL_COLLISION_MODE 'v'
+
+
+static void _update_collision(Bullet *bullet, char collision_mode, CollisionBoxList *collision_rec_list);
 
 
 Bullet *init_bullet(CollisionBoxList *collision_boxes) {
@@ -28,6 +36,7 @@ Bullet instance_bullet(Bullet *bullet, Vector2 spawn_pos, Vector2 spawn_directio
     Bullet new_bullet = *bullet;
     new_bullet.direction = spawn_direction;
     bullet->is_visible = true;
+    bullet->is_marked_for_deletion = false;
     new_bullet.spr.dest_rec.x = spawn_pos.x;
     new_bullet.spr.dest_rec.y = spawn_pos.y;
 
@@ -37,12 +46,14 @@ void update_bullet_list(Bullet *bullet_list, int bullet_list_size, CollisionBoxL
     for (int i=0; i<bullet_list_size; i++) {
         collision_boxes[BULLET_COLLISION_TYPE].list[i] = (Rectangle) {0};
         if (bullet_list[i].is_visible) {
-            if (bullet_list[i].lifetime <= 0) {
+            if (bullet_list[i].lifetime <= 0 || bullet_list[i].is_marked_for_deletion) {
                 bullet_list[i].is_visible = false;
             }
             bullet_list[i].lifetime -= dt;
             bullet_list[i].spr.dest_rec.x += bullet_list[i].direction.x * bullet_list[i].speed * dt;
+            _update_collision(&bullet_list[i], VERTICAL_COLLISION_MODE, collision_boxes);
             bullet_list[i].spr.dest_rec.y += bullet_list[i].direction.y * bullet_list[i].speed * dt;
+            _update_collision(&bullet_list[i], HORIZONTAL_COLLISION_MODE, collision_boxes);
 
             collision_boxes[BULLET_COLLISION_TYPE].list[i] = bullet_list[i].spr.dest_rec;
         }
@@ -62,6 +73,26 @@ void draw_bullet_list(Bullet *bullet_list, int bullet_list_size) {
 void destroy_bullet(Bullet *bullet) {
     destroy_sprite(&bullet->spr);
     MemFree(bullet);
+
+    return;
+}
+
+
+
+void _update_collision(Bullet *bullet, char collision_mode, CollisionBoxList *collision_rec_list) {
+    if (collision_rec_list == NULL) {
+        return;
+    }
+
+    CollisionBox bullet_box = {
+        .rec = bullet->spr.dest_rec,
+        .type = BULLET_COLLISION_TYPE,
+    };
+    CollisionBox colllided_box = check_collision_box_list(bullet_box, collision_rec_list);
+
+    if (colllided_box.type == ENEMY_COLLISION_TYPE) {
+        bullet->is_marked_for_deletion = true;
+    }
 
     return;
 }

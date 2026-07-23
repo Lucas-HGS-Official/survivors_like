@@ -125,7 +125,7 @@ void _update_collision(Player *player, char collision_mode, CollisionBoxList *co
     CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
 
     if (colllided_box.type == ENEMY_COLLISION_TYPE) {
-        // printf("\n IT DIES!! \n");
+        printf("\n IT DIES!! \n");
     }
 
     if (colllided_box.type == ENV_COLLISION_TYPE) {
