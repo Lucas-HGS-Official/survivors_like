@@ -48,12 +48,12 @@ void game_init(void) {
 
     map = init_tilemap(collision_boxes);
 
-    player = init_player(map->player_initial_pos);
+    player = init_player(map->player_initial_pos, collision_boxes);
     camera = init_player_camera(player);
     gun = init_gun(player);
-    bullet = init_bullet();
+    bullet = init_bullet(collision_boxes);
     bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
-    enemy_types = init_enemy_types();
+    enemy_types = init_enemy_types(collision_boxes);
 
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size + MAX_NUM_ENEMIES + 1) );
     for (int i=0; i<map->obj_blocks_size; i++) {
@@ -129,7 +129,7 @@ void _update_game(float dt) {
         }
     }
     fire_timer -= dt;
-    update_bullet_list(bullet_list, MAX_NUM_BULLETS, dt);
+    update_bullet_list(bullet_list, MAX_NUM_BULLETS, collision_boxes, dt);
 
     if (spawn_enemy_timer <= 0) {
         spawn_enemy_timer = 3.f;

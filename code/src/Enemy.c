@@ -23,7 +23,7 @@ static void _update_movement(Enemy *enemy, Vector2 player_position, CollisionBox
 void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *collision_rec_list);
 
 
-Enemy *init_enemy_types(void) {
+Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
     Enemy *enemy_types = (Enemy*)MemAlloc(sizeof(Enemy)*NUM_ENEMY_TYPES);
 
     for (ENEMY_TYPES i=0; i<NUM_ENEMY_TYPES; i++) {
@@ -45,6 +45,13 @@ Enemy *init_enemy_types(void) {
             char *filepath = (char*) TextFormat("resources/images/enemies/%s/%i.png", enemy_name, j);
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
         }
+    }
+
+    collision_boxes[ENEMY_COLLISION_TYPE].type = ENEMY_COLLISION_TYPE;
+    collision_boxes[ENEMY_COLLISION_TYPE].size = MAX_NUM_ENEMIES;
+    collision_boxes[ENEMY_COLLISION_TYPE].list = (Rectangle*)MemAlloc(sizeof(Rectangle) * MAX_NUM_ENEMIES);
+    for (int i=0; i<MAX_NUM_ENEMIES; i++) {
+        collision_boxes[ENEMY_COLLISION_TYPE].list[i] = (Rectangle) { 0 };
     }
 
     return enemy_types;
@@ -72,9 +79,11 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
 }
 void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_boxes, float dt) {
     for (int i=0; i<enemy_list_size; i++) {
+        collision_boxes[ENEMY_COLLISION_TYPE].list[i] = (Rectangle) {0};
         if (enemy_list[i].is_visible) {
             _update_animation(&enemy_list[i], dt);
             _update_movement(&enemy_list[i], player_position, collision_boxes, dt);
+            collision_boxes[ENEMY_COLLISION_TYPE].list[i] = enemy_list[i].hitbox_rec;
         }
     }
 
@@ -141,6 +150,10 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
         .type = PLAYER_COLLISION_TYPE,
     };
     CollisionBox colllided_box = check_collision_box_list(enemy_box, collision_rec_list);
+
+    if (colllided_box.type == BULLET_COLLISION_TYPE) {
+        // printf("\n THEY DIE!! \n");
+    }
 
     if (colllided_box.type == ENV_COLLISION_TYPE) {
         float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;

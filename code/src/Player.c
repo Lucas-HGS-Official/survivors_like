@@ -25,7 +25,7 @@ static void _update_movement(Player *player, CollisionBoxList *collision_boxes, 
 static void _update_collision(Player *player, char collision_mode, CollisionBoxList *collision_rec_list);
 
 
-Player *init_player(Vector2 initial_pos) {
+Player *init_player(Vector2 initial_pos, CollisionBoxList *collision_boxes) {
     Player *player = (Player*) MemAlloc(sizeof(Player));
 
     _load_sprites(player);
@@ -43,6 +43,11 @@ Player *init_player(Vector2 initial_pos) {
     player_hitbox_rec.width -= HORIZONTAL_WHITE_SPACE_PLAYER_SPR/2.f;
     player_hitbox_rec.height -= current_sprite->dest_rec.height/2.f;
     player->hitbox_rec = player_hitbox_rec;
+
+    collision_boxes[PLAYER_COLLISION_TYPE].type = PLAYER_COLLISION_TYPE;
+    collision_boxes[PLAYER_COLLISION_TYPE].size = 1;
+    collision_boxes[PLAYER_COLLISION_TYPE].list = (Rectangle*)MemAlloc(sizeof(Rectangle));
+    *collision_boxes[PLAYER_COLLISION_TYPE].list = player->hitbox_rec;
 
     return player;
 }
@@ -118,6 +123,10 @@ void _update_collision(Player *player, char collision_mode, CollisionBoxList *co
         .type = PLAYER_COLLISION_TYPE,
     };
     CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
+
+    if (colllided_box.type == ENEMY_COLLISION_TYPE) {
+        // printf("\n IT DIES!! \n");
+    }
 
     if (colllided_box.type == ENV_COLLISION_TYPE) {
         float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
@@ -195,6 +204,8 @@ void _update_movement(Player *player, CollisionBoxList *collision_boxes, float d
     _update_collision(player, HORIZONTAL_COLLISION_MODE, collision_boxes);
     player->hitbox_rec.y += player->direction.y * player->speed * dt;
     _update_collision(player, VERTICAL_COLLISION_MODE, collision_boxes);
+
+    *collision_boxes[PLAYER_COLLISION_TYPE].list = player->hitbox_rec;
 
     player->position = (Vector2) {
         .x = player->hitbox_rec.x - HORIZONTAL_WHITE_SPACE_PLAYER_SPR/4.f,

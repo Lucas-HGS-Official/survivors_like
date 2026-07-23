@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <stdbool.h>
 
+#include "CollisionBoxes.h"
 #include "Sprite.h"
 
 
@@ -18,8 +19,8 @@ typedef struct Bullet {
 } Bullet;
 
 
-Bullet *init_bullet(void);
+Bullet *init_bullet(CollisionBoxList *collision_boxes);
 Bullet instance_bullet(Bullet *bullet, Vector2 spawn_pos, Vector2 spawn_direction);
-void update_bullet_list(Bullet *bullet_list, int bullet_list_size, float dt);
+void update_bullet_list(Bullet *bullet_list, int bullet_list_size, CollisionBoxList *collision_boxes, float dt);
 void draw_bullet_list(Bullet *bullet_list, int bullet_list_size);
 void destroy_bullet(Bullet *bullet);

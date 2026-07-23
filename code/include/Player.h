@@ -39,7 +39,7 @@ typedef struct Player {
 } Player;
 
 
-Player *init_player(Vector2 initial_pos);
+Player *init_player(Vector2 initial_pos, CollisionBoxList *collision_boxes);
 Camera2D *init_player_camera(Player *player);
 void update_player(Player *player, CollisionBoxList *collision_boxes, float dt);
 void update_player_camera(Camera2D *camera, Player *player);
