@@ -1,7 +1,6 @@
 #include "CollisionBoxes.h"
 
 #include <raylib.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -44,9 +43,7 @@ CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList *collis
 void destroy_collision_box_list(CollisionBoxList *collision_boxes) {
     for (int i=0; i<NUM_COLLISION_TYPES; i++) {
         if (collision_boxes[i].list != NULL) {
-            printf("\n atempt at %i \n", i);
             MemFree(collision_boxes[i].list);
-            printf("\n success at %i \n", i);
         }
     }
 
