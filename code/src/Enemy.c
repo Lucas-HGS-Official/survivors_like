@@ -28,6 +28,7 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
     Enemy *enemy_types = (Enemy*)MemAlloc(sizeof(Enemy)*NUM_ENEMY_TYPES);
 
     Sound *impact_sound = (Sound*)MemAlloc(sizeof(Sound));
+    *impact_sound = LoadSound("resources/audio/impact.ogg");
 
     for (ENEMY_TYPES i=0; i<NUM_ENEMY_TYPES; i++) {
         char *enemy_name = "";
