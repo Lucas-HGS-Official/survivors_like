@@ -17,6 +17,7 @@ typedef struct Bullet {
     Sprite spr;
     float speed;
     float lifetime;
+    Sound *shoot_sfx;
 } Bullet;
 
 

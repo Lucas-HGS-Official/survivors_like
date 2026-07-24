@@ -24,6 +24,8 @@ static bool is_game_running = true;
 static CollisionBoxList collision_boxes[NUM_COLLISION_TYPES] = {0};
 static Sprite *foreground_sprites = NULL;
 
+static Sound game_music = {0};
+
 static Tilemap *map = NULL;
 
 static Player *player = NULL;
@@ -46,13 +48,19 @@ void game_init(void) {
     is_game_running = true;
     SetRandomSeed(0);
 
+    game_music = LoadSound("resources/audio/music.wav");
+
     map = init_tilemap(collision_boxes);
 
     player = init_player(map->player_initial_pos, collision_boxes);
     camera = init_player_camera(player);
     gun = init_gun(player);
+
     bullet = init_bullet(collision_boxes);
     bullet_list[0] = instance_bullet(bullet, gun->tip, gun->direction);
+    StopSound(*bullet_list[0].shoot_sfx);
+    bullet_list[0].is_visible = false;
+
     enemy_types = init_enemy_types(collision_boxes);
 
     foreground_sprites = (Sprite*)MemAlloc(sizeof(Sprite) * (map->obj_blocks_size + MAX_NUM_ENEMIES + 1) );
@@ -67,6 +75,9 @@ void game_init(void) {
 
     Sprite *player_sprite = &player->spr[0][0];
     foreground_sprites[map->obj_blocks_size] = *player_sprite;
+
+    PlaySound(game_music);
+    SetSoundVolume(game_music, .5f);
 
     return;
 }
@@ -91,6 +102,9 @@ void game_close(void) {
 
     destroy_tilemap(map);
 
+    StopSound(game_music);
+    UnloadSound(game_music);
+
     CloseAudioDevice();
     CloseWindow();
 
@@ -99,6 +113,10 @@ void game_close(void) {
 
 void _update_game(float dt) {
     if (WindowShouldClose()) { is_game_running = false; }
+
+    if (!IsSoundPlaying(game_music)) {
+        PlaySound(game_music);
+    }
 
     update_player(player, collision_boxes, dt);
     update_player_camera(camera, player);

@@ -27,6 +27,8 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
 Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
     Enemy *enemy_types = (Enemy*)MemAlloc(sizeof(Enemy)*NUM_ENEMY_TYPES);
 
+    Sound *impact_sound = (Sound*)MemAlloc(sizeof(Sound));
+
     for (ENEMY_TYPES i=0; i<NUM_ENEMY_TYPES; i++) {
         char *enemy_name = "";
         switch (i) {
@@ -42,6 +44,9 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
             case NUM_ENEMY_TYPES:
                 break;
         }
+
+        enemy_types[i].impact_sfx = impact_sound;
+
         for (int j=0; j<NUM_FRAMES; j++) {
             char *filepath = (char*) TextFormat("resources/images/enemies/%s/%i.png", enemy_name, j);
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
@@ -109,6 +114,10 @@ void destroy_enemy_types(Enemy *enemy_types) {
             destroy_sprite(&enemy_types[i].spr_anim[j]);
         }
     }
+
+    UnloadSound(*enemy_types->impact_sfx);
+    MemFree(enemy_types->impact_sfx);
+
     MemFree(enemy_types);
 
     return;
@@ -158,6 +167,7 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
 
     if (colllided_box.type == BULLET_COLLISION_TYPE) {
         enemy->is_marked_for_deletion = true;
+        PlaySound(*enemy->impact_sfx);
     }
 
     if (colllided_box.type == ENV_COLLISION_TYPE) {

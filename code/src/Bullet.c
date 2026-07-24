@@ -23,6 +23,9 @@ Bullet *init_bullet(CollisionBoxList *collision_boxes) {
     bullet->direction = (Vector2) { .x=1, .y=0 };
     bullet->lifetime = 10.f;
 
+    bullet->shoot_sfx = (Sound*)MemAlloc(sizeof(Sound));
+    *bullet->shoot_sfx = LoadSound("resources/audio/shoot.wav");
+
     collision_boxes[BULLET_COLLISION_TYPE].type = BULLET_COLLISION_TYPE;
     collision_boxes[BULLET_COLLISION_TYPE].size = MAX_NUM_BULLETS;
     collision_boxes[BULLET_COLLISION_TYPE].list = (Rectangle*)MemAlloc(sizeof(Rectangle) * MAX_NUM_BULLETS);
@@ -39,6 +42,8 @@ Bullet instance_bullet(Bullet *bullet, Vector2 spawn_pos, Vector2 spawn_directio
     bullet->is_marked_for_deletion = false;
     new_bullet.spr.dest_rec.x = spawn_pos.x;
     new_bullet.spr.dest_rec.y = spawn_pos.y;
+
+    PlaySound(*bullet->shoot_sfx);
 
     return new_bullet;
 }
@@ -72,6 +77,10 @@ void draw_bullet_list(Bullet *bullet_list, int bullet_list_size) {
 }
 void destroy_bullet(Bullet *bullet) {
     destroy_sprite(&bullet->spr);
+
+    UnloadSound(*bullet->shoot_sfx);
+    MemFree(bullet->shoot_sfx);
+
     MemFree(bullet);
 
     return;

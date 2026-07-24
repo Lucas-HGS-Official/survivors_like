@@ -27,6 +27,7 @@ typedef struct Enemy {
     Rectangle hitbox_rec;
     float frame_timer;
     int current_frame;
+    Sound *impact_sfx;
 } Enemy;
 
 typedef struct EnemyList {
