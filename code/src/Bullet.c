@@ -25,6 +25,7 @@ Bullet *init_bullet(CollisionBoxList *collision_boxes) {
 
     bullet->shoot_sfx = (Sound*)MemAlloc(sizeof(Sound));
     *bullet->shoot_sfx = LoadSound("resources/audio/shoot.wav");
+    SetSoundVolume(*bullet->shoot_sfx, 0.45f);
 
     collision_boxes[BULLET_COLLISION_TYPE].type = BULLET_COLLISION_TYPE;
     collision_boxes[BULLET_COLLISION_TYPE].size = MAX_NUM_BULLETS;
