@@ -30,7 +30,7 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
     Sound *impact_sound = (Sound*)MemAlloc(sizeof(Sound));
     *impact_sound = LoadSound("resources/audio/impact.ogg");
 
-    for (ENEMY_TYPES i=0; i<NUM_ENEMY_TYPES; i++) {
+    for (EnemyTypes i=0; i<NUM_ENEMY_TYPES; i++) {
         char *enemy_name = "";
         switch (i) {
             case BAT:
@@ -52,6 +52,12 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
             char *filepath = (char*) TextFormat("resources/images/enemies/%s/%i.png", enemy_name, j);
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
         }
+
+        Image enemy_image = LoadImageFromTexture(*enemy_types[i].spr_anim[0].texture);
+        Image enemy_image_alpha = ImageFromChannel(enemy_image_alpha, 3);
+        Texture2D enemy_alpha = LoadTextureFromImage(enemy_image_alpha);
+        enemy_types[i].spr_death.texture = MemAlloc(sizeof(Texture2D));
+        *enemy_types[i].spr_death.texture = enemy_alpha;
     }
 
     collision_boxes[ENEMY_COLLISION_TYPE].type = ENEMY_COLLISION_TYPE;
@@ -110,10 +116,11 @@ void draw_enemy_list(Enemy *enemy_list, int enemy_list_size) {
     return;
 }
 void destroy_enemy_types(Enemy *enemy_types) {
-    for (ENEMY_TYPES i=0; i<NUM_ENEMY_TYPES; i++) {
+    for (EnemyTypes i=0; i<NUM_ENEMY_TYPES; i++) {
         for (int j=0; j<NUM_FRAMES; j++) {
             destroy_sprite(&enemy_types[i].spr_anim[j]);
         }
+        destroy_sprite(&enemy_types[i].spr_death);
     }
 
     UnloadSound(*enemy_types->impact_sfx);

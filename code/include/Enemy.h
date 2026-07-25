@@ -9,18 +9,24 @@
 #define MAX_NUM_ENEMIES 100
 
 
-typedef enum ENEMY_TYPES {
+typedef enum EnemyTypes {
     BAT,
     BLOB,
     SKELETON,
 
     NUM_ENEMY_TYPES,
-} ENEMY_TYPES;
+} EnemyTypes;
+
+typedef enum EnemyStates {
+    ENEMY_ALIVE_STATE,
+    ENEMY_DEAD_STATE,
+} EnemyStates;
 
 typedef struct Enemy {
     bool is_visible;
     bool is_marked_for_deletion;
     Sprite spr_anim[NUM_FRAMES];
+    Sprite spr_death;
     Vector2 position;
     Vector2 direction;
     float speed;
