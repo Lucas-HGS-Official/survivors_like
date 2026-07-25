@@ -33,6 +33,7 @@ typedef struct Enemy {
     Rectangle hitbox_rec;
     float frame_timer;
     int current_frame;
+    EnemyStates current_state;
     Sound *impact_sfx;
 } Enemy;
 

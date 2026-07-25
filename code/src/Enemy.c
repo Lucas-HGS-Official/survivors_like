@@ -53,6 +53,7 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
         }
 
+        enemy_types[i].spr_death = enemy_types[i].spr_anim[0];
         Image enemy_image = LoadImageFromTexture(*enemy_types[i].spr_anim[0].texture);
         Image enemy_image_alpha = ImageFromChannel(enemy_image_alpha, 3);
         Texture2D enemy_alpha = LoadTextureFromImage(enemy_image_alpha);
@@ -73,6 +74,7 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
     Enemy new_enemy = *enemy;
     new_enemy.is_visible = true;
     new_enemy.is_marked_for_deletion = false;
+    new_enemy.current_state = ENEMY_ALIVE_STATE;
     new_enemy.position = spawn_point;
     new_enemy.direction = (Vector2) { .x=1, .y=0 };
     new_enemy.speed = 200.f;
