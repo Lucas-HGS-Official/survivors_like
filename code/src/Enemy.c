@@ -102,9 +102,8 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
 void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_boxes, float dt) {
     for (int i=0; i<enemy_list_size; i++) {
         collision_boxes[ENEMY_COLLISION_TYPE].list[i] = (Rectangle) {0};
-        if (enemy_list[i].is_visible) {
 
-            _update_animation(&enemy_list[i], dt);
+        if (enemy_list[i].is_visible) {
 
             if (enemy_list[i].current_state == ENEMY_ALIVE_STATE) {
                 if (enemy_list[i].is_marked_for_deletion) {
@@ -113,6 +112,7 @@ void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_po
                     enemy_list[i].frame_timer = FRAME_TIME;
                     enemy_list[i].current_frame = NUM_FRAMES;
                 }
+                _update_animation(&enemy_list[i], dt);
                 _update_movement(&enemy_list[i], player_position, collision_boxes, dt);
                 collision_boxes[ENEMY_COLLISION_TYPE].list[i] = enemy_list[i].hitbox_rec;
 
@@ -120,6 +120,7 @@ void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_po
                 if (enemy_list[i].frame_timer <= 0) {
                     enemy_list[i].is_visible = false;
                 }
+                enemy_list[i].frame_timer -= dt;
             }
         }
     }
@@ -151,13 +152,11 @@ void destroy_enemy_types(Enemy *enemy_types) {
 }
 
 void _update_animation(Enemy *enemy, float dt) {
-    if (enemy->current_state == ENEMY_ALIVE_STATE) {
-        if (enemy->frame_timer <= 0) {
-            enemy->frame_timer = FRAME_TIME;
-            enemy->current_frame++;
-            if (enemy->current_frame >= NUM_FRAMES) {
-                enemy->current_frame = 0;
-            }
+    if (enemy->frame_timer <= 0) {
+        enemy->frame_timer = FRAME_TIME;
+        enemy->current_frame++;
+        if (enemy->current_frame >= NUM_FRAMES) {
+            enemy->current_frame = 0;
         }
     }
     enemy->frame_timer -= dt;
