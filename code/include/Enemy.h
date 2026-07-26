@@ -25,8 +25,7 @@ typedef enum EnemyStates {
 typedef struct Enemy {
     bool is_visible;
     bool is_marked_for_deletion;
-    Sprite spr_anim[NUM_FRAMES];
-    Sprite spr_death;
+    Sprite spr_anim[NUM_FRAMES+1];
     Vector2 position;
     Vector2 direction;
     float speed;

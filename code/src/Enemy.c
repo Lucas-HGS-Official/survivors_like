@@ -53,12 +53,20 @@ Enemy *init_enemy_types(CollisionBoxList *collision_boxes) {
             init_sprite(&enemy_types[i].spr_anim[j], filepath);
         }
 
-        enemy_types[i].spr_death = enemy_types[i].spr_anim[0];
-        Image enemy_image = LoadImageFromTexture(*enemy_types[i].spr_anim[0].texture);
-        Image enemy_image_alpha = ImageFromChannel(enemy_image_alpha, 3);
-        Texture2D enemy_alpha = LoadTextureFromImage(enemy_image_alpha);
-        enemy_types[i].spr_death.texture = MemAlloc(sizeof(Texture2D));
-        *enemy_types[i].spr_death.texture = enemy_alpha;
+        // enemy_types[i].spr_death = enemy_types[i].spr_anim[0];
+        char *filepath = (char*) TextFormat("resources/images/enemies/%s/0.png", enemy_name);
+        init_sprite(&enemy_types[i].spr_anim[NUM_FRAMES], filepath);
+        Image enemy_image = LoadImageFromTexture(*enemy_types[i].spr_anim[NUM_FRAMES].texture);
+
+        UnloadTexture(*enemy_types[i].spr_anim[NUM_FRAMES].texture);
+
+        Image enemy_image_alpha = ImageFromChannel(enemy_image, 3);
+        UnloadImage(enemy_image);
+
+        Texture2D enemy_alpha_texture = LoadTextureFromImage(enemy_image_alpha);
+        UnloadImage(enemy_image_alpha);
+        // enemy_types[i].spr_death.texture = MemAlloc(sizeof(Texture2D));
+        // *enemy_types[i].spr_death.texture = enemy_alpha_texture;
     }
 
     collision_boxes[ENEMY_COLLISION_TYPE].type = ENEMY_COLLISION_TYPE;
@@ -96,13 +104,15 @@ Enemy instance_enemy(Enemy *enemy, Vector2 spawn_point) {
 void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_position, CollisionBoxList *collision_boxes, float dt) {
     for (int i=0; i<enemy_list_size; i++) {
         collision_boxes[ENEMY_COLLISION_TYPE].list[i] = (Rectangle) {0};
-        if (enemy_list[i].is_visible) {
-            if (enemy_list[i].is_marked_for_deletion) {
-                enemy_list[i].is_visible = false;
+        if (enemy_list[i].current_state == ENEMY_ALIVE_STATE) {
+            if (enemy_list[i].is_visible) {
+                if (enemy_list[i].is_marked_for_deletion) {
+                    enemy_list[i].current_state = ENEMY_DEAD_STATE;
+                }
+                _update_animation(&enemy_list[i], dt);
+                _update_movement(&enemy_list[i], player_position, collision_boxes, dt);
+                collision_boxes[ENEMY_COLLISION_TYPE].list[i] = enemy_list[i].hitbox_rec;
             }
-            _update_animation(&enemy_list[i], dt);
-            _update_movement(&enemy_list[i], player_position, collision_boxes, dt);
-            collision_boxes[ENEMY_COLLISION_TYPE].list[i] = enemy_list[i].hitbox_rec;
         }
     }
 
@@ -119,10 +129,9 @@ void draw_enemy_list(Enemy *enemy_list, int enemy_list_size) {
 }
 void destroy_enemy_types(Enemy *enemy_types) {
     for (EnemyTypes i=0; i<NUM_ENEMY_TYPES; i++) {
-        for (int j=0; j<NUM_FRAMES; j++) {
+        for (int j=0; j<NUM_FRAMES+1; j++) {
             destroy_sprite(&enemy_types[i].spr_anim[j]);
         }
-        destroy_sprite(&enemy_types[i].spr_death);
     }
 
     UnloadSound(*enemy_types->impact_sfx);
@@ -134,7 +143,7 @@ void destroy_enemy_types(Enemy *enemy_types) {
 }
 
 void _update_animation(Enemy *enemy, float dt) {
-    if (enemy->frame_timer <=0) {
+    if (enemy->frame_timer <= 0) {
         enemy->frame_timer = FRAME_TIME;
         enemy->current_frame++;
         if (enemy->current_frame >= NUM_FRAMES) {
