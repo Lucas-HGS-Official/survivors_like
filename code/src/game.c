@@ -150,7 +150,7 @@ void _update_game(float dt) {
     update_bullet_list(bullet_list, MAX_NUM_BULLETS, collision_boxes, dt);
 
     if (spawn_enemy_timer <= 0) {
-        spawn_enemy_timer = 3.f;
+        spawn_enemy_timer = 1.f;
         for (int i=0; i<MAX_NUM_ENEMIES; i++) {
             if (!enemy_list.list[i].is_visible) {
                 int rand_enemy = GetRandomValue(0, NUM_ENEMY_TYPES-1);
