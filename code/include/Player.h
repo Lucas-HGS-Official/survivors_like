@@ -29,6 +29,7 @@ typedef struct Player {
     Vector2 direction;
     float speed;
     Rectangle hitbox_rec;
+    CollisionBox collided_boxes[MAX_COLLISIONS];
 
     PlayerFacingDir facing_direction;
     PlayerAnimState anim_state;

@@ -17,6 +17,7 @@ typedef struct Bullet {
     Sprite spr;
     float speed;
     float lifetime;
+    CollisionBox collided_boxes[MAX_COLLISIONS];
     Sound *shoot_sfx;
 } Bullet;
 

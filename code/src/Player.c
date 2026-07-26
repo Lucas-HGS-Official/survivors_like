@@ -122,32 +122,34 @@ void _update_collision(Player *player, char collision_mode, CollisionBoxList *co
         .rec = player->hitbox_rec,
         .type = PLAYER_COLLISION_TYPE,
     };
-    CollisionBox colllided_box = check_collision_box_list(player_box, collision_rec_list);
+    check_collision_box_list(player_box, collision_rec_list, player->collided_boxes);
 
-    if (colllided_box.type == ENEMY_COLLISION_TYPE) {
-        printf("\n IT DIES!! \n");
-    }
+    for (int i=0; i<MAX_COLLISIONS; i++) {
+        if (player->collided_boxes[i].type == ENEMY_COLLISION_TYPE) {
+            printf("\n IT DIES!! \n");
+        }
 
-    if (colllided_box.type == ENV_COLLISION_TYPE) {
-        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
-        float collided_left_left = colllided_box.rec.x;
-        float collided_top_side = colllided_box.rec.y;
-        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
+        if (player->collided_boxes[i].type == ENV_COLLISION_TYPE) {
+            float collided_right_side = player->collided_boxes[i].rec.x + player->collided_boxes[i].rec.width;
+            float collided_left_left = player->collided_boxes[i].rec.x;
+            float collided_top_side = player->collided_boxes[i].rec.y;
+            float collided_bottom_side = player->collided_boxes[i].rec.y + player->collided_boxes[i].rec.height;
 
 
-        if (collision_mode == HORIZONTAL_COLLISION_MODE) {
-            if (player->direction.x > 0) {
-                player->hitbox_rec.x = collided_left_left - player->hitbox_rec.width;
-            }
-            if (player->direction.x < 0) {
-                player->hitbox_rec.x = collided_right_side;
-            }
-        } else {
-            if (player->direction.y > 0) {
-                player->hitbox_rec.y = collided_top_side - player->hitbox_rec.height;
-            }
-            if (player->direction.y < 0) {
-                player->hitbox_rec.y = collided_bottom_side;
+            if (collision_mode == HORIZONTAL_COLLISION_MODE) {
+                if (player->direction.x > 0) {
+                    player->hitbox_rec.x = collided_left_left - player->hitbox_rec.width;
+                }
+                if (player->direction.x < 0) {
+                    player->hitbox_rec.x = collided_right_side;
+                }
+            } else {
+                if (player->direction.y > 0) {
+                    player->hitbox_rec.y = collided_top_side - player->hitbox_rec.height;
+                }
+                if (player->direction.y < 0) {
+                    player->hitbox_rec.y = collided_bottom_side;
+                }
             }
         }
     }

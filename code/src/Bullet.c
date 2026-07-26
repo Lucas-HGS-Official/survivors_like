@@ -98,10 +98,16 @@ void _update_collision(Bullet *bullet, char collision_mode, CollisionBoxList *co
         .rec = bullet->spr.dest_rec,
         .type = BULLET_COLLISION_TYPE,
     };
-    CollisionBox colllided_box = check_collision_box_list(bullet_box, collision_rec_list);
+    check_collision_box_list(bullet_box, collision_rec_list, bullet->collided_boxes);
 
-    if (colllided_box.type == ENEMY_COLLISION_TYPE) {
-        bullet->is_marked_for_deletion = true;
+    for (int i=0; i<MAX_COLLISIONS; i++) {
+
+        if (bullet->collided_boxes[i].type == ENEMY_COLLISION_TYPE) {
+            bullet->is_marked_for_deletion = true;
+            if (IsSoundPlaying(*bullet->shoot_sfx)) {
+                StopSound(*bullet->shoot_sfx);
+            }
+        }
     }
 
     return;

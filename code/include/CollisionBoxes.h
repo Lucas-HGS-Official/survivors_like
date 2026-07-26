@@ -4,6 +4,9 @@
 #include <stdbool.h>
 
 
+#define MAX_COLLISIONS 20
+
+
 typedef enum CollisionType {
     NONE_COLLISION_TYPE,
 
@@ -28,5 +31,5 @@ typedef struct CollisionBoxList {
 
 
 void create_collision_box_list(CollisionBoxList *collision_boxes, Rectangle *recs, CollisionType box_type, int num_recs);
-CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList *collision_boxes);
+void check_collision_box_list(CollisionBox box, CollisionBoxList *collision_boxes, CollisionBox *collided_boxes);
 void destroy_collision_box_list(CollisionBoxList *collision_boxes);

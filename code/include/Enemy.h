@@ -30,6 +30,7 @@ typedef struct Enemy {
     Vector2 direction;
     float speed;
     Rectangle hitbox_rec;
+    CollisionBox collided_boxes[MAX_COLLISIONS];
     float frame_timer;
     int current_frame;
     EnemyStates current_state;

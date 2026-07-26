@@ -109,7 +109,7 @@ void update_enemy_list(Enemy *enemy_list, int enemy_list_size, Vector2 player_po
                 if (enemy_list[i].is_marked_for_deletion) {
                     enemy_list[i].current_state = ENEMY_DEAD_STATE;
 
-                    enemy_list[i].frame_timer = FRAME_TIME;
+                    enemy_list[i].frame_timer = FRAME_TIME*2;
                     enemy_list[i].current_frame = NUM_FRAMES;
                 }
                 _update_animation(&enemy_list[i], dt);
@@ -191,32 +191,38 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
         .rec = enemy->hitbox_rec,
         .type = PLAYER_COLLISION_TYPE,
     };
-    CollisionBox colllided_box = check_collision_box_list(enemy_box, collision_boxes);
+    check_collision_box_list(enemy_box, collision_boxes, enemy->collided_boxes);
 
-    if (colllided_box.type == BULLET_COLLISION_TYPE) {
-        enemy->is_marked_for_deletion = true;
-        PlaySound(*enemy->impact_sfx);
-    }
+    for (int i=0; i<MAX_COLLISIONS; i++) {
 
-    if (colllided_box.type == ENV_COLLISION_TYPE) {
-        float collided_right_side = colllided_box.rec.x + colllided_box.rec.width;
-        float collided_left_left = colllided_box.rec.x;
-        float collided_top_side = colllided_box.rec.y;
-        float collided_bottom_side = colllided_box.rec.y + colllided_box.rec.height;
+        if (enemy->collided_boxes[i].type == BULLET_COLLISION_TYPE) {
+            enemy->is_marked_for_deletion = true;
+            PlaySound(*enemy->impact_sfx);
+        }
 
-        if (collision_mode == 'h') {
-            if (enemy->direction.x > 0) {
-                enemy->hitbox_rec.x = collided_left_left - enemy->hitbox_rec.width;
-            }
-            if (enemy->direction.x < 0) {
-                enemy->hitbox_rec.x = collided_right_side;
-            }
-        } else {
-            if (enemy->direction.y > 0) {
-                enemy->hitbox_rec.y = collided_top_side - enemy->hitbox_rec.height;
-            }
-            if (enemy->direction.y < 0) {
-                enemy->hitbox_rec.y = collided_bottom_side;
+        if (
+            enemy->collided_boxes[i].type == ENV_COLLISION_TYPE ||
+            enemy->collided_boxes[i].type == ENEMY_COLLISION_TYPE
+        ) {
+            float collided_right_side = enemy->collided_boxes[i].rec.x + enemy->collided_boxes[i].rec.width;
+            float collided_left_left = enemy->collided_boxes[i].rec.x;
+            float collided_top_side = enemy->collided_boxes[i].rec.y;
+            float collided_bottom_side = enemy->collided_boxes[i].rec.y + enemy->collided_boxes[i].rec.height;
+
+            if (collision_mode == 'h') {
+                if (enemy->direction.x > 0) {
+                    enemy->hitbox_rec.x = collided_left_left - enemy->hitbox_rec.width;
+                }
+                if (enemy->direction.x < 0) {
+                    enemy->hitbox_rec.x = collided_right_side;
+                }
+            } else {
+                if (enemy->direction.y > 0) {
+                    enemy->hitbox_rec.y = collided_top_side - enemy->hitbox_rec.height;
+                }
+                if (enemy->direction.y < 0) {
+                    enemy->hitbox_rec.y = collided_bottom_side;
+                }
             }
         }
     }

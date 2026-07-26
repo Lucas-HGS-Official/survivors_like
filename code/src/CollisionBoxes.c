@@ -17,9 +17,14 @@ void create_collision_box_list(CollisionBoxList *collision_boxes, Rectangle *rec
     }
 }
 
-CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList *collision_boxes) {
+void check_collision_box_list(CollisionBox box, CollisionBoxList *collision_boxes, CollisionBox *collided_boxes) {
     CollisionBox collided_box = {0};
 
+
+    for (int i=0; i<MAX_COLLISIONS; i++) {
+        collided_boxes[i] = collided_box;
+    }
+    int index = 0;
     for (int i=0; i<NUM_COLLISION_TYPES; i++) {
         for (int j=0; j<collision_boxes[i].size; j++) {
             collided_box.rec = collision_boxes[i].list[j];
@@ -30,14 +35,13 @@ CollisionBox check_collision_box_list(CollisionBox box, CollisionBoxList *collis
             } else if (_is_collision_box_identical(box, collided_box)) {
                 continue;
             } else if (CheckCollisionRecs(box.rec, collided_box.rec)) {
-                return collided_box;
+                collided_boxes[index] = collided_box;
+                index++;
             }
         }
     }
 
-    collided_box = (CollisionBox) {0};
-
-    return collided_box;
+    return;
 }
 
 void destroy_collision_box_list(CollisionBoxList *collision_boxes) {
