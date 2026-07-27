@@ -202,7 +202,6 @@ void _update_collision(Enemy *enemy, char collision_mode, CollisionBoxList *coll
 
         if (
             enemy->collided_boxes[i].type == ENV_COLLISION_TYPE
-            // || enemy->collided_boxes[i].type == ENEMY_COLLISION_TYPE
         ) {
             float collided_right_side = enemy->collided_boxes[i].rec.x + enemy->collided_boxes[i].rec.width;
             float collided_left_left = enemy->collided_boxes[i].rec.x;
